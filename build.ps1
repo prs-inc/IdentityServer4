@@ -1,25 +1,9 @@
 $ErrorActionPreference = "Stop";
 
-New-Item -ItemType Directory -Force -Path ./nuget
+New-Item  -Path ./.nuget -ItemType Directory -Force
 
 dotnet tool restore
 
-pushd ./src/Storage
+Push-Location ./src
 Invoke-Expression "./build.ps1 $args"
-popd
-
-pushd ./src/IdentityServer4
-Invoke-Expression "./build.ps1 $args"
-popd
-
-pushd ./src/EntityFramework.Storage
-Invoke-Expression "./build.ps1 $args"
-popd
-
-pushd ./src/EntityFramework
-Invoke-Expression "./build.ps1 $args"
-popd
-
-pushd ./src/AspNetIdentity
-Invoke-Expression "./build.ps1 $args"
-popd
+Pop-Location

@@ -8,8 +8,8 @@ namespace build
 {
     partial class Program
     {
-        private const string packOutput = "./artifacts";
-        private const string packOutputCopy = "../../nuget";
+        private const string packOutput = "./.artifacts";
+        private const string packOutputCopy = "../.nuget";
         private const string envVarMissing = " environment variable is missing. Aborting.";
 
         private static class Targets
@@ -56,8 +56,19 @@ namespace build
 
             Target(Targets.Pack, DependsOn(Targets.Build, Targets.CleanPackOutput), () =>
             {
-                var project = Directory.GetFiles("./src", "*.csproj", SearchOption.TopDirectoryOnly).OrderBy(_ => _).First();
+                var project = Directory.GetFiles("./Storage/src", "*.csproj", SearchOption.TopDirectoryOnly).OrderBy(_ => _).First();
+                Run("dotnet", $"pack {project} -c Release -o \"{Directory.CreateDirectory(packOutput).FullName}\" --no-build --nologo", echoPrefix: Prefix);
 
+                project = Directory.GetFiles("./IdentityServer4/src", "*.csproj", SearchOption.TopDirectoryOnly).OrderBy(_ => _).First();
+                Run("dotnet", $"pack {project} -c Release -o \"{Directory.CreateDirectory(packOutput).FullName}\" --no-build --nologo", echoPrefix: Prefix);
+
+                project = Directory.GetFiles("./AspNetIdentity/src", "*.csproj", SearchOption.TopDirectoryOnly).OrderBy(_ => _).First();
+                Run("dotnet", $"pack {project} -c Release -o \"{Directory.CreateDirectory(packOutput).FullName}\" --no-build --nologo", echoPrefix: Prefix);
+
+                project = Directory.GetFiles("./EntityFramework.Storage/src", "*.csproj", SearchOption.TopDirectoryOnly).OrderBy(_ => _).First();
+                Run("dotnet", $"pack {project} -c Release -o \"{Directory.CreateDirectory(packOutput).FullName}\" --no-build --nologo", echoPrefix: Prefix);
+
+                project = Directory.GetFiles("./EntityFramework/src", "*.csproj", SearchOption.TopDirectoryOnly).OrderBy(_ => _).First();
                 Run("dotnet", $"pack {project} -c Release -o \"{Directory.CreateDirectory(packOutput).FullName}\" --no-build --nologo", echoPrefix: Prefix);
             });
 
