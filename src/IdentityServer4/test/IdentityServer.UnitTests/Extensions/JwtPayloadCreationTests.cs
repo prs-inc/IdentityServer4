@@ -39,15 +39,19 @@ namespace IdentityServer.UnitTests.Extensions
         [Fact]
         public void Should_create_scopes_as_array_by_default()
         {
-            var options = new IdentityServerOptions();
-            var payload = _token.CreateJwtPayload(new SystemClock(), options, TestLogger.Create<JwtPayloadCreationTests>());
+            var options = new IdentityServerOptions
+            {
+                EmitScopesAsSpaceDelimitedStringInJwt = false
+            };
+            var payload = _token.CreateJwtPayloadDictionary(new SystemClock(), options, TestLogger.Create<JwtPayloadCreationTests>());
 
             payload.Should().NotBeNull();
-            var scopes = payload.Claims.Where(c => c.Type == JwtClaimTypes.Scope).ToArray();
+            var scopes = (string[])payload[JwtClaimTypes.Scope];
+            
             scopes.Count().Should().Be(3);
-            scopes[0].Value.Should().Be("scope1");
-            scopes[1].Value.Should().Be("scope2");
-            scopes[2].Value.Should().Be("scope3");
+            scopes[0].Should().Be("scope1");
+            scopes[1].Should().Be("scope2");
+            scopes[2].Should().Be("scope3");
         }
         
         [Fact]
@@ -58,10 +62,10 @@ namespace IdentityServer.UnitTests.Extensions
                 EmitScopesAsSpaceDelimitedStringInJwt = true
             };
             
-            var payload = _token.CreateJwtPayload(new SystemClock(), options, TestLogger.Create<JwtPayloadCreationTests>());
+            var payload = _token.CreateJwtPayloadDictionary(new SystemClock(), options, TestLogger.Create<JwtPayloadCreationTests>());
 
             payload.Should().NotBeNull();
-            var scopes = payload.Claims.Where(c => c.Type == JwtClaimTypes.Scope).ToList();
+            var scopes = payload.Where(c => c.Key == JwtClaimTypes.Scope).ToList();
             scopes.Count().Should().Be(1);
             scopes.First().Value.Should().Be("scope1 scope2 scope3");
         }
