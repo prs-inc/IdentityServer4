@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<version>
+  <!--
+       * The product@version is how the Release as a whole is known to the business
+       * The source is used to lookup what branch and revision this version was created from
+       * The file@revision is really the build counter for this Release.  There are scripts
+         in buildserver-utils ps1 files that use the <file> element otherwise it would be 
+         renamed to <build>.
+       * The file@date is used to build up the alpha build number for nuget packages and 
+         the FileInfo.Revision value for the version of the file in the MSI database.
+  -->
+  <product version="6.0.0" knownas="IdentityServer4" />
+  <source branch="6.0.0" revision="73fee437f6838fa9fd7f60f05889fe5a096be8b9" />
+  <file revision="0" date="2022-06-23T06:03:34.3640008-05:00" />
+</version>

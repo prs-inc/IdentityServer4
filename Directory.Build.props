@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <!-- AssemblyCommonInfo.cs -->
+  <PropertyGroup>
+    <AssemblyVersion>2110.23.0.0</AssemblyVersion>
+    <Company>CaseMaxSolutions</Company>
+    <Copyright>Copyright 1999-2022 © CaseMaxSolutions</Copyright>
+    <FileVersion>21.1.23.150</FileVersion>
+    <InformationalVersion>2110.23.0-alpha.8948</InformationalVersion>
+    <Product>CaseMax 21.1.0</Product>
+    <PackageVersion>2110.23.0-alpha.8948</PackageVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <!-- used in PackageReference[@Version] for Solutions in this repository that put nupkg files in the ./.build/packages directory -->
+    <SolutionVersion>2110.23.0-alpha*</SolutionVersion>
+  </PropertyGroup>
+</Project>
