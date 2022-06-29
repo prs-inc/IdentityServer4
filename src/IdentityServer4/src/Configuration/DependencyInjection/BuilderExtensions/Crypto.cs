@@ -7,7 +7,6 @@ using IdentityServer4.Configuration;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Linq;
@@ -185,7 +184,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
                 if (persistKey)
                 {
-                    File.WriteAllText(filename, JsonConvert.SerializeObject(jwk));
+                    File.WriteAllText(filename, System.Text.Json.JsonSerializer.Serialize(jwk));
                 }
 
                 return builder.AddSigningCredential(key, signingAlgorithm);
