@@ -19,12 +19,6 @@
     <!--our stuff -->
     <PackageReference Update="IdentityModel" Version="5.2.0" />
 
-    <PackageReference Update="IdentityServer4" Version="$(SolutionVersion)" />
-    <PackageReference Update="IdentityServer4.AspNetIdentity" Version="$(SolutionVersion)" />
-    <PackageReference Update="IdentityServer4.Storage" Version="$(SolutionVersion)" />
-    <PackageReference Update="IdentityServer4.EntityFramework.Storage" Version="$(SolutionVersion)" />
-    <PackageReference Update="IdentityServer4.EntityFramework" Version="$(SolutionVersion)" />
-
     <!--microsoft extensions -->
     <PackageReference Update="Microsoft.Extensions.Caching.Memory" Version="$(ExtensionsVersion)" />
     <PackageReference Update="Microsoft.Extensions.Http" Version="$(ExtensionsVersion)" />

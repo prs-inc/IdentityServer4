@@ -434,7 +434,12 @@ function Delete-NuGetGlobalPackages {
     # Need to find out where the NuGet global-packages cache is because there are several
     # ways to have it not be in the default location.
     $path = Join-Path -Path $root -ChildPath ".external-bin\NuGet\nuget"
-    $output = (& "$path" locals global-packages -list)
+    if (Test-Path -Path $path){
+        $output = (& "$path" locals global-packages -list)
+    }
+    else {
+        $output = (dotnet nuget locals global-packages --list)
+    }
     $path = $output.Replace('global-packages: ', '')
 
     # this path will not exist on machines that have not used NuGet to pull down packages
