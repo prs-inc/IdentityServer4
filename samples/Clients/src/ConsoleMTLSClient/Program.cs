@@ -31,9 +31,8 @@ namespace ConsoleMTLSClient
             if (disco.IsError) throw new Exception(disco.Error);
 
             var endpoint = disco
-                    .TryGetValue(OidcConstants.Discovery.MtlsEndpointAliases)
-                    .Value<string>(OidcConstants.Discovery.TokenEndpoint)
-                    .ToString();
+                .TryGetValue(OidcConstants.Discovery.MtlsEndpointAliases)
+                .TryGetString(OidcConstants.Discovery.TokenEndpoint);
             
             var response = await client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
             {

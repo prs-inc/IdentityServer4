@@ -35,8 +35,7 @@ namespace ConsoleEphemeralMtlsClient
 
             var endpoint = disco
                 .TryGetValue(OidcConstants.Discovery.MtlsEndpointAliases)
-                .Value<string>(OidcConstants.Discovery.TokenEndpoint)
-                .ToString();
+                .TryGetString(OidcConstants.Discovery.TokenEndpoint);
             
             var response = await client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
             {
