@@ -7,57 +7,10 @@
 
     [ValidateSet('dev', 'ccnet', 'nightly', 'beta', 'rc')]
     [string]
-    $BuildType = 'dev',
-
-    [ValidateSet('windows', 'oidc')]
-    [string]
-    $AuthType = 'windows',
-
-    [ValidateSet('iis', 'iisexp')]
-    [string]
-    $WebServerType = 'iisexp',
-
-    [String[]]
-    $Databases = @('cms', 'PaperWise', 'ProVantage'),
-    
-    [string]
-    $SqlServerName = 'localhost',
-
-    [Parameter(Mandatory=$false)]
-    [String]
-    $SqlServerAdminPassword = '',
-
-    [ValidateSet('none', 'iis', 'service')]
-    [string]
-    $WorkpointHostType = 'service',
-
-    [string]
-    $DbInstallerPsFileName = 'cms-dbinstaller.ps1'
+    $BuildType = 'dev'
 )
 
 . .\filesystem.include.ps1
-
-Write-Host "SqlServerName parameter is ---$SqlServerName---"
-
-if ($SqlServerName -eq '') {
-    
-    # find all of the SQL Server instances on this server and pick a random
-    # one to use as the instance
-    $instance = (Get-Service -DisplayName "SQL Server (*" |
-            Select-Object -ExpandProperty Name |
-            Get-Random)
-
-    if ($instance.Contains('$')){
-        $instanceName = $instance.Substring($instance.IndexOf('$') + 1)
-        $SqlServerName = "localhost\$instanceName"
-    }
-    else {
-        $SqlServerName = 'localhost'
-    }
-
-    Write-Host "using the random SQL Server host $SqlServerName"
-    
-}
 
 # change the git.exe output it sends to STDERR to go to STDOUT so that the 
 # progress reports or additional info that git.exe writes to STDERR are not
@@ -152,36 +105,15 @@ Add-BuildTask -Name Init -Jobs {
 
 Add-BuildTask -Name DependenciesUpdate -Jobs {
 
-    Stop-Workpoint
-    
     #dependencies-update.ps1 needs to be executed from correct working directory
     Set-Location $root
     
-    .\dependencies-update.ps1 -BuildType $BuildType -WebServerType $WebServerType
+    .\dependencies-update.ps1 -BuildType $BuildType
 
     Set-Location $BuildRoot
 }
 
-Add-BuildTask -Name Setup-IIS -Jobs {
-
-    if ($WebServerType -ne 'iis'){
-        return
-    }
-
-    .\iis-website-unlock.ps1
-
-}
-
-Add-BuildTask -Name Setup-Workpoint -Jobs {
-    if ($WorkpointHostType -eq 'none'){
-        return;
-    }
-    
-    Stop-Workpoint
-    .\workpoint-setup.ps1 -RootPath "$root" -WorkpointHostType $WorkpointHostType
-}
-
-Add-BuildTask -Name Build-All -Jobs DependenciesUpdate, Init, Clean, UpdateAssemblyInfo, Setup-IIS, Setup-Workpoint, {
+Add-BuildTask -Name Build-All -Jobs DependenciesUpdate, Init, Clean, UpdateAssemblyInfo, {
 
     foreach ($_ in $Solutions){
         $targets = @('Build', 'Setup', 'Package')
@@ -284,31 +216,6 @@ Add-BuildTask -Name Package -Jobs Init, Build, {
     foreach ($_ in $Solutions) {
         Invoke-SlnBuild -Solution $_ -Target 'Package'
     }
-}
-
-Add-BuildTask -Name RefreshDatabases -Jobs {
-
-    # if a single solution is passed in then use that solutions
-    # RefreshDatabases task because it might have pre/post processing
-    # that runs certain commands
-    if ($Solutions.Count -eq 1){
-        Write-Host "using RefreshDatabase task in Solution $Solution"
-        $buildFile = Combine-Paths -Paths $root, $Solution, "$Solution.build.ps1"
-        
-        # properties dealing with how to connect to SQL will be read through (property ...) in the params
-        Invoke-Build -Task RefreshDatabases -File $buildFile
-    }
-    else {
-        Invoke-Build -Task Drop, Restore -File 'manage-databases.build.ps1'
-        # can hard code 'Debug' because RefreshDatabases at the top-level will only be called
-        # from developer machine
-        Invoke-Build -Task Upgrade -File $DbInstallerPsFileName -VsConfiguration 'Debug'
-    }
-}
-
-Add-BuildTask -Name RestoreDatabases -Jobs {
-    # properties dealing with how to connect to SQL will be read through (property ...) in the params
-    Invoke-Build -Task Drop, Restore -File ".\manage-databases.build.ps1"
 }
 
 # company-info.include.build
@@ -602,21 +509,6 @@ function Commit-VCS {
     if ($CompanyName -eq 'CaseMaxSolutions'){
         git push origin "$tag"
     }
-}
-
-function Stop-Workpoint {
-
-    if ($WorkpointHostType -eq 'none'){
-       Write-Host 'no instance of Workpoint Host should be managed'
-       return 
-    }
-    
-    # if workpoint.net service exists then stop it before updating dependencies
-    # can't just use Get-Service with the full name because it throws an Exception
-    # if there is not a matching service found
-    Get-Service -Name 'Wp*' |
-        Where-Object {$_.Name -eq 'WpGeneralMonitor'} |
-        Stop-Service -Force -ErrorAction Continue
 }
 
 function Delete-NuGetGlobalPackages {

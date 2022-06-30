@@ -1,0 +1,5 @@
+version.xml merge=ours
+Directory.Build.props merge=ours
+merge-branch.txt merge=ours
+**/AssemblyCommonInfo.cs merge=ours
+**/*.Generated.wxs merge=ours

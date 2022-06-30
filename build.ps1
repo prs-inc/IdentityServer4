@@ -11,7 +11,7 @@ The default value is empty and all Solutions are processed.
 An array of task to ask the build file to perform.  The following Tasks are supported:
   * DependenciesUpdate : Updates .external-bin directory
   * Build-All : typically run by build server to do an everything build
-  * Build-Package : typically run on dev workstation to switch over to this branch along with RefreshDatabases
+  * Build-Package : typically run on dev workstation to switch over to this branch
   * Clean : removes all build output
   * Build : compiles the solutions
   * Setup : sets up applications required to run solutions (such as IIS, IIS Express, Workpoint)
@@ -85,7 +85,7 @@ Import-Module -Name InvokeBuild -RequiredVersion $invokeBuildVersion
 $started = Get-Date
 
 $solutions = @(
-    'src'
+    'IdentityServer4'
 )
 
 # Create this directory so the NuGet.config does not cause issues with a source directory

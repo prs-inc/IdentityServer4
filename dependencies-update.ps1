@@ -14,5 +14,3 @@ $nugetExe = (Download-NuGet)
 
 Add-NuGetPackageSource -Name "Solution Packages" -Path (Join-Path -Path ".build" -ChildPath "packages")
 
-Setup-Nodejs -Version "12.13.1"
-

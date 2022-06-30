@@ -10,8 +10,8 @@
     <PackageTags>OAuth2;OAuth 2.0;OpenID Connect;Security;Identity;IdentityServer;ASP.NET Identity</PackageTags>
     <PackageIcon>icon.jpg</PackageIcon>
     <PackageProjectUrl>https://github.com/IdentityServer/IdentityServer4</PackageProjectUrl>
+    <PackageOutputPath>$(SolutionDir)..\.build\packages\</PackageOutputPath>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageReleaseNotes>https://github.com/IdentityServer/IdentityServer4/releases</PackageReleaseNotes>
 
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
@@ -43,7 +43,7 @@
   </ItemGroup>
     
   <ItemGroup>
-    <ProjectReference Include="..\..\IdentityServer4\src\IdentityServer4.csproj" />
+    <ProjectReference Include="..\IdentityServer4\IdentityServer4.csproj" />
   </ItemGroup>
 
 </Project>

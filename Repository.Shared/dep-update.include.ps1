@@ -27,17 +27,7 @@ if (!(Get-Module -Name 'Az.Storage' -ListAvailable)) {
     Install-Module -Name 'Az.Storage' -Scope CurrentUser -Confirm:$false -Force
 }
 
-# Using the PowerShell version of NVM because it runs on both Windows (full PowerShell)
-# and Linux (PowerShell core) and provides a much nicer interface than dealing with
-# parsing text output.
-Write-Host "checking to see if nvm module is installed"
-if (!(Get-Module -Name 'nvm' -ListAvailable)){
-    Write-Host 'installing nvm module'
-    Install-Module -Name 'nvm' -Scope CurrentUser -Confirm:$false -Force
-}
-
 Import-Module -Name 'Az.Storage'
-Import-Module -Name 'nvm'
 
 # this local directory will be used if present to save traffic to/from Azure because
 # that is much slower than pulling from a local file

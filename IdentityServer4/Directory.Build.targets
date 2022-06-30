@@ -8,9 +8,6 @@
 
   <ItemGroup>
     <!--build related-->
-    <PackageReference Include="MinVer" Version="2.3.0" PrivateAssets="All" />
-    <PackageReference Update="SimpleExec" Version="6.2.0" />
-    <PackageReference Update="Bullseye" Version="3.3.0" />
     <PackageReference Update="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
 
     <!--tests -->
@@ -59,10 +56,5 @@
     <PackageReference Update="Microsoft.EntityFrameworkCore.Design" Version="$(EntityFrameworkVersion)" PrivateAssets="All" />
 
   </ItemGroup>
-
-  <Target Name="SetAssemblyVersion" AfterTargets="MinVer">
-    <PropertyGroup>
-      <AssemblyVersion>$(MinVerMajor).$(MinVerMinor).$(MinVerPatch).0</AssemblyVersion>
-    </PropertyGroup>
-  </Target>
+    
 </Project>

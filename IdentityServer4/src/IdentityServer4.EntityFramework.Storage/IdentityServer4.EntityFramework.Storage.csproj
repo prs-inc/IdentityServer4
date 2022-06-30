@@ -8,9 +8,9 @@
     <Authors>Brock Allen;Dominick Baier;Scott Brady</Authors>
     <PackageTags>OAuth2;OAuth 2.0;OpenID Connect;Security;Identity;IdentityServer;EntityFramework</PackageTags>
     <PackageIcon>icon.jpg</PackageIcon>
+    <PackageOutputPath>$(SolutionDir)..\.build\packages\</PackageOutputPath>
     <PackageProjectUrl>https://github.com/IdentityServer/IdentityServer4</PackageProjectUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageReleaseNotes>https://github.com/IdentityServer/IdentityServer4/releases</PackageReleaseNotes>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -39,7 +39,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\..\Storage\src\IdentityServer4.Storage.csproj" />
+    <ProjectReference Include="..\IdentityServer4.Storage\IdentityServer4.Storage.csproj" />
   </ItemGroup>
 
 </Project>

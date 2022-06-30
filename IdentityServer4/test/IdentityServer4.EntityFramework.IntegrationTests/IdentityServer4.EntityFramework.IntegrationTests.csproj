@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
 
-    <AssemblyOriginatorKeyFile>../../../../key.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>../../../key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
   </PropertyGroup>
@@ -13,8 +13,8 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\..\..\IdentityServer4\src\IdentityServer4.csproj" />
-    <ProjectReference Include="..\..\src\IdentityServer4.EntityFramework.Storage.csproj" />
+    <ProjectReference Include="..\..\src\IdentityServer4\IdentityServer4.csproj" />
+    <ProjectReference Include="..\..\src\IdentityServer4.EntityFramework.Storage\IdentityServer4.EntityFramework.Storage.csproj" />
   </ItemGroup>
 
   <ItemGroup>
