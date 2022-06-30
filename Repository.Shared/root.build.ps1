@@ -24,11 +24,10 @@ $root = (Resolve-Path '..')
 
 $rootArtifactsPath = Join-Path -Path $root -ChildPath "\.build\artifacts"
 
-#read in company-info.include.build
-$CompanyAbbrv = ''
-$CompanyName = ''
+#read from company.xml
+$CompanyName = 'CaseMaxSolutions'
 
-#read in vcs-info.include.build
+#read in version.xml
 $vcsRevision = ''
 $vcsBranch = ''
 
@@ -42,6 +41,7 @@ $knownas = ''
 # this is storing the Nth build of the Product that is being performed.
 $buildNumber = 0
 
+# CaseMax Release = Major.Minor.Point
 # Version = Major.Minor.Build.Revision in standard MS talk.
 #
 # ProductVersion is how the application is known by the TP Release - so this
@@ -51,51 +51,44 @@ $buildNumber = 0
 # everyone refers to it as 19.2 and 20.1
 [System.Version]$ProductVersion = [System.Version]::Parse('0.0.0')
 
-# will contain the incremented build number.  The Build property will be zero. The Revision 
+# Will contain the incremented build number.  The Revision 
 # property will be the total number of hours since the last RC build. 
 # FileInfoVersion is 4 parts used by MSI to determine if the binary file in the MSI is newer
 # that was is on disk. We keep it close to ProductVersion for communication except for that
 # the Build and Revision part will be different.  
-# The Build will be 4 digits - (PointBuild * 1000) + FileRevision.  
+# The Build will be 4 digits - (ReleasePoint * 1000) + FileRevision.  
 # The Revision will be based on number of hours since last RC build.
 [System.Version]$FileInfoVersion = [System.Version]::Parse('0.0.0.0')
 
 # InstallerVersion is 3 parts used by MSI to determine if an upgrade can be 
 # performed. We keep it close to ProductVersion for communication except for that
-# the Build part will be 4 digits - (PointBuild * 1000) + FileRevision.  
+# the Build part will be 4 digits - (PointBuild * 1000) + FileRevision. The Revision
+# will be 0 because it is insignificant to MSI
 [System.Version]$InstallerVersion = [System.Version]::Parse('0.0.0')
 
-# AssemblyVersion is used by the .NET CLR determines compatibility matches
-# We make breaking changes every Release so the Release will be stored in the Major Part.
-# That means 19.2, 19.2.1, 20.1 will be a Major version 1920, 1921, and 2010.  The Minor 
-# part will be the incremented build number - we don't guarantee binary compatibility but
-# typically keep it after a Release has hit GA.  This will force any new build to have a 
-# redirect policy or to make sure the dependent binaries are up to date from a recompile.
+# AssemblyVersion is used by the .NET CLR determines compatibility matches.
+# This will be the same value as ProductVersion because we intend to follow 
+# semver with API compatibility
 [System.Version]$AssemblyVersion = [System.Version]::Parse('0.0.0.0')
 
-# PackageVersion is closely related to AssemblyVersion.  
+# PackageVersion is going to be the same as InstallerVersion except it will
+# include "-alpha" for non RC builds.
 # PackageVersion is used by NuGet and is supposed to follow Semantic Versioning.  
-# We still have to work with Visual Studio/MSBuild/NuGet.  Since the Minor for the 
+# We still have to work with Visual Studio/MSBuild/NuGet.  Since the Build for the 
 # PackageVersion will be increased with each rc build that should allow for the 
-# Build Server to have a new unique Major.Minor.0.  On Debug builds the pre-release info is
+# Build Server to have a new unique Major.Minor.Build.  On Debug builds the pre-release info is
 # going to be auto-set based on //file[date] and that will be set in the 
 # Directory.Build.props file.  This allows for the developer to always have 
 # new package version with each build.
 $PackageVersion = '0.0.0-alpha.0'
 
 Add-BuildTask -Name Init -Jobs {
-    _Get-CompanyInfo
     _Get-VCSInfo
-    Write-Host "building rev $vcsRevision on branch $vcsBranch for company $CompanyName ($CompanyAbbrv)"
+    Write-Host "building rev $vcsRevision on branch $vcsBranch for company $CompanyName"
 
-    # This will keep the casemax builds for PRS.CMS, SAPC.CMS, and SIWPC.CMS to continue 
-    # to output to the same folder structure as expected by copy-to-qa-downloads.ps1.  But 
-    # this allows for multiple git respositories (such as utils) to create a structure that
-    # puts it in a unique directory
-    $childPath = (Combine-Paths -Paths "releases", "releases-$CompanyAbbrv")
-    if ($ProductName -ne '') {
-        $childPath = (Combine-Paths -Paths "releases", "$ProductName", "$CompanyAbbrv")
-    }
+    # If this structure changes then buildserver-utils/dev/IdentityServer4/copy-to-qa-download.ps1 needs
+    # to be updated.
+    $childPath = (Combine-Paths -Paths "releases", "$ProductName")
 
     $script:releasePath = (Join-Path -Path (Get-Location).Drive.Root -ChildPath "$childPath")
     $script:releaseOutputPath = (Join-Path -Path $releasePath -ChildPath "$vcsBranch-$BuildType")
@@ -218,25 +211,6 @@ Add-BuildTask -Name Package -Jobs Init, Build, {
     }
 }
 
-# company-info.include.build
-function _Get-CompanyInfo {
-    # need to use Resolve-Path because the working directory used by Xml.Save is
-    # different than the current powershell directory
-    if (Test-Path -Path "$root\company.xml"){
-        Write-Host "using company info from company.xml"
-        $path = (Resolve-Path -Path "$root\company.xml")
-
-        $xml = [xml](Get-Content -Path $path)
-        $script:CompanyAbbrv = $xml.company.abbreviation
-        $script:CompanyName = $xml.company.name
-    }
-    else {
-        Write-Host "using CaseMaxSolutions company info"
-        $script:CompanyAbbrv = 'PRS.CMS'
-        $script:CompanyName = 'CaseMaxSolutions'
-    }
-}
-
 # vcs-info.include.build
 function _Get-VCSInfo {
     $script:vcsRevision = $(git log -1 --pretty="%H")
@@ -254,80 +228,33 @@ function _Get-VersionFromXml {
     # directory.  If the root one doesn't exist that means we are in a Firm specific build so we 
     # need to check to see if the external-bin has been populated.  On build servers, the external-bin
     # directory is always clean so we know we need to do update dependencies
-    if (!(Test-Path -Path "$root\version.xml") -and (!(Test-Path -Path "$root\.external-bin\CMS\version.xml"))){
-        Write-Error "unable to get version.xml file at the root or in .external-bin"
+    if (!(Test-Path -Path "$root\version.xml")){
+        Write-Error "unable to get version.xml file at the root"
     }
 
-    if (Test-Path -Path "$root\version.xml" ) {
-        $path = (Resolve-Path -Path "$root\version.xml")
-        $xml = [xml](Get-Content -Path $path)
+    $path = (Resolve-Path -Path "$root\version.xml")
+    $xml = [xml](Get-Content -Path $path)
 
-        $Script:knownas = $xml.version.product.knownas
-        $fileDate = [DateTime]::Parse($xml.version.file.date)
+    $Script:knownas = $xml.version.product.knownas
+    $fileDate = [DateTime]::Parse($xml.version.file.date)
 
-        # This alpha build number needs to be set to allow for a developer to generate new nupkg versions
-        # Using TotalMinutes because developers can do builds fairly quickly and this is not part of the 
-        # official "Version" - just info about the alpha build in the SemVer of nupkg file.
-        $alphaBuildNum = [Math]::Ceiling($now.Subtract($fileDate).TotalMinutes)
+    # This alpha build number needs to be set to allow for a developer to generate new nupkg versions
+    # Using TotalMinutes because developers can do builds fairly quickly and this is not part of the 
+    # official "Version" - just info about the alpha build in the SemVer of nupkg file.
+    $alphaBuildNum = [Math]::Ceiling($now.Subtract($fileDate).TotalMinutes)
 
-        # this is a Major.Minor.Build - or (2 digit Year).(ReleaseInYear).(PointInRelease)
-        $Script:ProductVersion = [System.Version]::Parse($xml.version.product.version)
+    # this is a Major.Minor.Build - or (2 digit Year).(ReleaseInYear).(PointInRelease)
+    $Script:ProductVersion = [System.Version]::Parse($xml.version.product.version)
 
-        # Have to increment the Revision on a file because that is how MSI knows that file is newer.  Using TotalHours
-        # because ccnet or dev builds that might be moved out to other machines for testing don't happen that often.
-        # This should allow for about 7 years between current build and last rc build.  Even when doing an RC build
-        # this needs to be compared to last RC build because all the alpha builds between previous RC and the RC being
-        # performed now could be out there.  So this File needs to be considered newer than an alpha build.
-        $fileRevision = [Math]::Ceiling($now.Subtract($fileDate).TotalHours)
-        
-        # when we are in CaseMax we are building the "next" revision of the Version of code now,
-        $Script:buildNumber = [int]$xml.version.file.revision + 1
-    }
-    else {
-        $path = (Resolve-Path -Path "$root\.external-bin\CMS\version.xml")
-        $xml = [xml](Get-Content -Path $path)
-
-        $exeFile = (Get-Item -Path "$root\.external-bin\CMS\CaseMaxSolutions\PRS.CMS\PRS.CMS.Service.exe")
-        $exeVersionInfo = $exeFile.VersionInfo
-        Write-Host "creating Firm version from CaseMax FileVersion $($exeVersionInfo.FileVersion)" `
-            " and ProductVersion $($exeVersionInfo.ProductVersion)" `
-            " that was built at $($exeFile.CreationTime)"
-
-        # reading this from the xml file because that is the best spot to get it.  In the file it is
-        # a portion of the ProductName 
-        $Script:knownas = $xml.version.product.knownas
+    # Have to increment the Revision on a file because that is how MSI knows that file is newer.  Using TotalHours
+    # because ccnet or dev builds that might be moved out to other machines for testing don't happen that often.
+    # This should allow for about 7 years between current build and last rc build.  Even when doing an RC build
+    # this needs to be compared to last RC build because all the alpha builds between previous RC and the RC being
+    # performed now could be out there.  So this File needs to be considered newer than an alpha build.
+    $fileRevision = [Math]::Ceiling($now.Subtract($fileDate).TotalHours)
     
-        # want to use the fileDate from the CMS assembly as the base date for incrementing the Alpha Build Number
-        $fileDate = $exeFile.CreationTime
-
-        # This alpha build number needs to be set to allow for a developer to generate new nupkg versions
-        # Using TotalMinutes because developers can do builds fairly quickly and this is not part of the 
-        # official "Version" - just info about the alpha build in the SemVer of nupkg file.
-        $alphaBuildNum = [Math]::Ceiling($now.Subtract($fileDate).TotalMinutes)
-        
-        # If the CMS file we are referencing has an -alpha in the product name then we might be doing an
-        # alpha build for the Firm.  If so, then we want to increment the Firm's alpha
-        if ($exeVersionInfo.ProductVersion.Contains("-alpha")) {
-            Write-Host "adding $alphaBuildNum to the CaseMax alpha build"
-            $alphaBuildNum = $alphaBuildNum + $exeVersionInfo.ProductVersion.Split('.')[3]
-        }
-
-        # the point releases such as 20.2.1.## will have a file version of 20.2.10##
-        $vYear = $exeVersionInfo.FileMajorPart
-        $vReleaseInYear = $exeVersionInfo.FileMinorPart
-        $vPoint = [Math]::Floor($exeVersionInfo.FileBuildPart/1000)
-
-        # this is a Major.Minor.Build - or (2 digit Year).(ReleaseInYear).(PointInRelease)
-        Write-Host "converting CaseMax FileVersion into ProductVersion $vYear.$vReleaseInYear.$vPoint"
-        $Script:ProductVersion = New-Object System.Version($vYear, $vReleaseInYear, $vPoint)
-        
-        # want to have the same fileRevision for the Firm's assembly as the CaseMax assembly so Windows Explorer
-        # can be used to see that everything matches up.
-        $fileRevision = $exeVersionInfo.FilePrivatePart
-
-        # when we are in a Firm build we are building to match the CaseMax version.
-        $Script:buildNumber = $exeVersionInfo.FileBuildPart % 1000
-    }
+    # when we are in CaseMax we are building the "next" revision of the Version of code now,
+    $Script:buildNumber = [int]$xml.version.file.revision + 1
 
     $major = $Script:ProductVersion.Major
     $minor = $Script:ProductVersion.Minor
@@ -339,8 +266,7 @@ function _Get-VersionFromXml {
 
     $Script:FileInfoVersion = New-Object System.Version($major, $minor, $installerBuild, $fileRevision)
     
-    $packageMajor = ($major * 100) + ($minor * 10) + $point
-    $Script:AssemblyVersion = New-Object System.Version($packageMajor, $Script:buildNumber, 0, 0)
+    $Script:AssemblyVersion = New-Object System.Version($major, $minor, $installerBuild)
 
     # The PackageVersion only uses the major.minor.build of the AssemblyVersion since it is using
     # semver.  If this is not an rc build then we will add pre-release identifier to indicate the
@@ -362,18 +288,6 @@ function Write-CommonAssemblyInfo {
     $solutionVersion = $PackageVersion
     if ($PackageVersion.Contains('-alpha')){
         $solutionVersion = $PackageVersion.Substring(0, $PackageVersion.IndexOf('-alpha')) + "-alpha*"
-    }
-
-    if (Test-Path -Path "$root\AssemblyCommonInfo.cs") {
-        Write-Host "Updating AssemblyCommonInfo.cs file"
-        Set-Content -Path "$root\AssemblyCommonInfo.cs" -Encoding UTF8 -Value @"
-[assembly: System.Reflection.AssemblyCompanyAttribute("$CompanyName")]
-[assembly: System.Reflection.AssemblyCopyrightAttribute("$copyright")]
-[assembly: System.Reflection.AssemblyProductAttribute("$knownas $ProductVersion")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("$PackageVersion")]
-[assembly: System.Reflection.AssemblyVersionAttribute("$AssemblyVersion")]
-[assembly: System.Reflection.AssemblyFileVersionAttribute("$FileInfoVersion")]
-"@
     }
 
     if (Test-Path -Path "$root\Directory.Build.props") {

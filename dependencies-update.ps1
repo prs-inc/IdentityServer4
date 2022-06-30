@@ -4,13 +4,13 @@ param(
     $BuildType = 'dev'
 )
 
-dotnet tool restore
-
 #include standard code to update dependencies in .external-bin that gets from 
 # either Azure or network share
 . .\Repository.Shared\dep-update.include.ps1
 
-$nugetExe = (Download-NuGet)
+dotnet tool restore
 
-Add-NuGetPackageSource -Name "Solution Packages" -Path (Join-Path -Path ".build" -ChildPath "packages")
-
+# tell NuGet to use the local sources that the VS/Rider build of packages is output to
+Add-NuGetPackageSource `
+    -Name "Solution Packages" `
+    -Path (Join-Path -Path ".build" -ChildPath "packages")

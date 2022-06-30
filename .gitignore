@@ -1,6 +1,7 @@
 # PRS Build Artifacts
 .nuget/
 .artifacts/
+.build/
 .external-bin/
 
 # Rider

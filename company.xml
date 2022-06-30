@@ -1,6 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<!-- the name is used in the build files to do some steps conditionally for just CaseMax code -->
-<company 
-   name="CaseMaxSolutions" 
-   abbreviation="PRS.CMS" 
-/>

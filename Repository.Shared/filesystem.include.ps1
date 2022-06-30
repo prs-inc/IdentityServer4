@@ -46,15 +46,3 @@ function New-Directory {
     
     New-Item -Path $Path -ItemType "Directory"
 }
-
-function Add-ProgramDataDir($path){
-    $fullpath = $env:ProgramData + $path
-    Remove-Directory -Path $fullpath
-
-    # the previous delete might not have fully deleted it because there could be a 
-    # running process that has a hold of a file in one of the subdirectories
-    if ((Test-Path -Path $fullpath) -eq $false) {
-        New-Item $fullpath -ItemType Directory
-    }
-}
-

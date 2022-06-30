@@ -3,7 +3,8 @@
 Bootstrap file for calling Invoke-Build using the file .\.build.ps1
 
 .PARAMETER Solution
-The name of the Solution to build.  If no value is supplied then all (except for 'dev' builds) the solutions are processed.
+The name of the Solution to build.  If no value is supplied then all (except for 'dev' builds) the solutions are 
+processed.
 
 The default value is empty and all Solutions are processed.
 
@@ -19,9 +20,8 @@ An array of task to ask the build file to perform.  The following Tasks are supp
   * Package : packages the content of the build
   * UpdateAssemblyInfo : updates all AssemblyCommonInfo.cs files
 
-The tasks Build-All, Build-Package, Clean, Build, Setup, Test, and Package will iterate through the Solutions or the specific
-Solution parameter.  The task RefreshDatabase will run for a specific Solution if that property is specified, otherwise
-the RefreshDatabase in here will run.  All other tasks should be assumed to run one-time and not be specific to a
+The tasks Build-All, Build-Package, Clean, Build, Setup, Test, and Package will iterate through the Solutions or 
+the specific Solution parameter.  All other tasks should be assumed to run one-time and not be specific to a
 Solution.
 
 .PARAMETER BuildType
@@ -36,12 +36,12 @@ get rid of any old VS output for each solution, then run Build and Setup and Tes
 then Refresh the databases.
 
 .EXAMPLE
-.\build.ps1 -Solution src -Task Build
+.\build.ps1 -Solution IdentityServer4 -Task Build
 
 This is the command to run for building a specific solution.
 
 .EXAMPLE
-.\build.ps1 -Solution src -Task Test
+.\build.ps1 -Solution IdentityServer4 -Task Test
 
 This is the command to run for running the tests in a specific solution.
 
@@ -98,6 +98,7 @@ if (!(Test-Path -Path '.\.build\packages')) {
 
 Invoke-Build -Task $Task `
     -File '.\Repository.Shared\root.build.ps1' `
+    -ProductName 'IdentityServer4' `
     -Solutions $solutions `
     -BuildType $BuildType
 

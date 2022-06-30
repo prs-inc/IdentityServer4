@@ -17,7 +17,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Host.AspNetIdentity", "host
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Host.EntityFramework", "host\Host.EntityFramework\Host.EntityFramework.csproj", "{36AC7CC9-0B14-43DB-BE50-8A27E049A9BF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetIdentityDb", "migrations\AspNetIdentityDb.\AspNetIdentityDb.csproj", "{44366287-D5ED-486F-AA5C-802E60430B98}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetIdentityDb", "migrations\AspNetIdentityDb\AspNetIdentityDb.csproj", "{44366287-D5ED-486F-AA5C-802E60430B98}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EntityFrameworkDb", "migrations\EntityFrameworkDb\EntityFrameworkDb.csproj", "{34C5E207-059D-4776-82F5-D65625C523CA}"
 EndProject
@@ -53,12 +53,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build-root", "build-root", 
 		..\dependencies-update.ps1 = ..\dependencies-update.ps1
 		..\NuGet.config = ..\NuGet.config
 		..\Directory.Build.props = ..\Directory.Build.props
+		..\version.xml = ..\version.xml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build-shared", "build-shared", "{37C91239-0E66-47CE-9D82-2758A0F161E8}"
 	ProjectSection(SolutionItems) = preProject
 		..\Repository.Shared\dep-update.include.ps1 = ..\Repository.Shared\dep-update.include.ps1
-		..\Repository.Shared\diagnostics.include.ps1 = ..\Repository.Shared\diagnostics.include.ps1
 		..\Repository.Shared\filesystem.include.ps1 = ..\Repository.Shared\filesystem.include.ps1
 		..\Repository.Shared\root.build.ps1 = ..\Repository.Shared\root.build.ps1
 		..\Repository.Shared\sln.include.ps1 = ..\Repository.Shared\sln.include.ps1

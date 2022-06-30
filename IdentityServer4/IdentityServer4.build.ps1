@@ -2,8 +2,6 @@ param(
     $BuildType = (property BuildType 'dev')
 )
 
-Set-Alias -Name MSBuild (Resolve-MSBuild 17.0)
-
 $slnName = 'IdentityServer4'
 $bitness = 'x64'
 
@@ -27,7 +25,7 @@ Add-BuildTask -Name Build -Jobs {
 }
 
 Add-BuildTask -Name Setup -Jobs {
-    # nothing to do, no running apps
+    # nothing to do, no running apps that require setup
 }
 
 Add-BuildTask -Name Test -Jobs {
@@ -39,17 +37,5 @@ Add-BuildTask -Name Test -Jobs {
 }
 
 Add-BuildTask -Name Package -Jobs {
-
-    <#
-    $packagePath = '.\.build\artifacts\package'
-    $slnPath = "$packagePath\CaseMaxSolutions\PRS.Aspose\"
-
-    New-Directory -Path "$packagePath\CaseMaxSolutions"
-    New-Directory -Path "$slnPath"
-    New-Directory -Path "$slnPath\bin"
-
-    Package-Exe -Project 'PRS.Aspose.DocumentExplorer' -VsBinPath $vsBinPath -Destination $slnPath
-    Package-Exe -Project 'PRS.Aspose.CLI' -VsBinPath "$vsBinPath\net472" -Destination $slnPath
-    #>
-
+    # only output from this solution is NuGet packages
 }

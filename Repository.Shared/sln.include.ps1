@@ -9,24 +9,6 @@ $rootPath = (Resolve-Path -Path '..')
 # current root file
 . ([System.IO.Path]::Combine($rootPath, 'Repository.Shared', 'filesystem.include.ps1'))
 
-function Set-MSBuildAlias {
-    param (
-        [string]$Version
-    )
-    
-    if ($IsLinux -eq $true){
-        # this is not using any specific version, just the latest one in the path
-        # this should be irreleveant because all Linux builds should be using dotnet.exe
-        # instead of the Mono version of msbuild
-        $path = "/usr/bin/msbuild"
-    }
-    else {
-        $path = (Resolve-MSBuild $Version)
-    }
-    
-    Set-Alias -Name MSBuild $path -Scope Global
-}
-
 function Remove-CompilerFiles {
     # MSBuild Clean leaves behind files that it did not create
     Remove-Item -Path '.\src\*\bin\*' -Recurse -Force -ErrorAction SilentlyContinue
@@ -37,31 +19,6 @@ function Remove-CompilerFiles {
         Remove-Item -Path '.\test\*\bin\*' -Recurse -Force -ErrorAction SilentlyContinue
         Remove-Item -Path '.\test\*\obj\*' -Recurse -Force -ErrorAction SilentlyContinue
     }
-}
-
-function Remove-CodeAnalysisOutputFiles {
-    Remove-Item -Path ".\src\*\bin\*" -Include "*.CodeAnalysisLog.xml" -Recurse
-    Remove-Item -Path ".\src\*\bin\*" -Include "*.lastcodeanalysis*" -Recurse
-
-    # some sln seperate out the src and test into seperate directories
-    if (Test-Path -Path '.\test') {
-        Remove-Item -Path ".\test\*\bin\*" -Include "*.CodeAnalysisLog.xml" -Recurse
-        Remove-Item -Path ".\test\*\bin\*" -Include "*.lastcodeanalysis*" -Recurse
-    }
-}
-
-function Restore-NuGet {
-    param (
-        [Parameter(Mandatory=$true)]
-        [string]
-        $Solution
-    )
-    $path = Join-Path -Path $rootPath -ChildPath ".external-bin\NuGet\nuget"
-    Write-Host "restoring with nuget at $path"
-
-    exec {
-        & "$path" restore "$Solution.sln"
-    }  
 }
 
 function Invoke-DotNetTest {
@@ -96,66 +53,6 @@ function Invoke-DotNetTest {
         dotnet test $args
     }
 
-}
-
-function Invoke-NUnit {
-    param (
-        [String[]]$Project,
-        [String]$WorkingPath,
-
-        [ValidateSet('x86', 'x64')]
-        [String]$Bitness = 'x64'
-    )
-
-    $nunit = (Resolve-Path -Path '..\.external-bin\NUnit.ConsoleRunner\tools\nunit3-console.exe')
-
-    Set-Location -Path $WorkingPath
-    exec {
-        $args = @()
-        foreach ($proj in $Project){
-            $args += "$proj.dll"
-        }
-
-        $args += "--result=.nunit-test-results.xml"
-        $args += '--framework="net-4.5"'
-        $args += '--labels=All'
-
-        # need to add a parameter if we are running x86
-        if ($Bitness -eq 'x86') {
-            $args += "--x86"
-        }
-        
-        & "$nunit" $args
-    }
-    
-    Set-Location $BuildRoot
-    
-}
-
-function Invoke-KarmaTestRunner {
-    param (
-        [string]$Project
-    )
-
-    Set-Location -Path ".\src\$Project"
-    exec {
-        & node ".\node_modules\karma\bin\karma" start karma.conf.js --single-run
-    }
-
-    Set-Location -Path $BuildRoot
-}
-
-function Invoke-XmlDoc2CmdletDoc {
-    param (
-        [String]$Project,
-        [String]$VsBinPath
-    )
-    
-    $docExe = Resolve-Path -Path "$rootPath\.external-bin\XmlDoc2CmdletDoc\tools\XmlDoc2CmdletDoc.exe"
-
-    exec {
-        & $docExe ".\src\$Project\$vsBinPath\$Project.dll"
-    }
 }
 
 function Package-Exe {
@@ -350,75 +247,6 @@ function Update-WebConfig {
     }
 }
 
-function Copy-WorkpointConfigFile {
-    param (
-        [Parameter(Mandatory=$true)]
-        [String]
-        $Destination,
-        
-        [ValidateSet('Tcp', 'NamedPipe', 'WsHttp')]
-        [String]
-        $Protocol = 'Tcp'
-    )
-    
-    Write-Host "copying protocol $Protocol config files if WorkpointBPMClient.dll exists in directory $Destination"
-    # only copy if the Workpoint client dll is there even if the build file says to do it.
-    if (Test-Path -Path "$Destination\WorkpointBPMClient.dll") {
-
-        # assume this build is being done for CaseMax, but check the external-bin to see 
-        # if a CMS directory exists
-        $workpointServerPath = "..\.external-bin\Workpoint.NET\server"
-        if (Test-Path -Path "..\.external-bin\CMS\Workpoint.NET"){
-            $workpointServerPath = "..\.external-bin\CMS\Workpoint.NET"
-        }
-
-        $path = "$workpointServerPath\conf\WorkpointClient\$Protocol\WorkpointBPMClient.dll.config"
-        Write-Host "copying protocol $protocol config files from $path"
-        Copy-Item -Path $path -Destination "$Destination" -Force
-    }
-}
-
-function Remove-WorkpointConfigFile {
-    param (
-        [Parameter(Mandatory=$true)]
-        [String]
-        $Path,
-
-        [ValidateSet('Client', 'Server')]
-        [String[]]
-        $Type = @('Client', 'Server')
-    )
-    
-    foreach($_ in $Type){
-        $file = "$Path\WorkpointBPM$_.dll.config"
-
-        Write-Host "removing Workpoint config file at $file"
-        # only copy if the Workpoint client dll is there even if the build file says to do it.
-        if (Test-Path -Path $file) {
-            Write-Host "removing config files"
-            Remove-Item -Path $file -Force
-        }
-    }
-}
-
-function Stop-IIS-AppPool {
-    param (
-        [Parameter(Mandatory=$true)]
-        [string]
-        $AppPoolName
-    )
-    ..\Repository.Shared\iis-webapp-stop.ps1 -AppPoolNames $AppPoolName
-}
-
-function Stop-IIS-AppPools {
-    param (
-        [Parameter(Mandatory=$true)]
-        [string[]]
-        $AppPoolNames
-    )
-    ..\Repository.Shared\iis-webapp-stop.ps1 -AppPoolNames $AppPoolNames
-}
-
 function Stop-IISExpress {
     param (
         [Parameter(Mandatory=$true)]
@@ -441,28 +269,6 @@ function Stop-IISExpress {
             Stop-Process -Id $expPid -Force
         }
     }
-}
-
-function Config-IIS-WebApp {
-    param(
-        [string]$SiteName = 'Default Web Site',
-        [string]$AppName,
-        [string]$PhysicalPath,
-        [string]$AppPoolName = '',
-        [string]$LoadUserProfile = 'true',
-        [string]$RuntimeVersion = 'v4.0'
-    )
-
-    # running through an external file because it requires a powershell
-    # module that won't be installed on developer workstations if IIS is
-    # not installed (in 2020 it should not be)
-    ..\Repository.Shared\iis-webapp-setup.ps1 `
-        -SiteName $SiteName `
-        -AppName $AppName `
-        -PhysicalPath $PhysicalPath `
-        -AppPoolName $AppPoolName `
-        -LoadUserProfile $LoadUserProfile `
-        -RuntimeVersion $RuntimeVersion
 }
 
 function Config-IISExpress {
@@ -503,74 +309,6 @@ function Config-IISExpress {
             -Path "$rootPath\$Solution\.vs\config\applicationhost.config" `
             -Destination "$rootPath\$Solution\.idea\config\applicationhost.config"
     }
-}
-
-function Config-IISExpress-Auth {
-    param(
-        [String]$SiteName,
-
-        [ValidateSet('windows', 'oidc')]
-        [String]
-        $AuthType = 'windows'
-    )
-
-    $appcmd = 'C:\Program Files\IIS Express\appcmd.exe'
-    $configPath = (Resolve-Path -Path ".\.vs\config\applicationhost.config")
-    $siteName = 'PRS.CMS.Web.Intranet/CMS'
-
-    # if we are using OIDC for authentication then modify the web.config
-    # file for PRS.CMS.Web.Intranet
-    Write-Host "the AuthType is $AuthType"
-    $winAuth = 'true'
-    $anonAuth = 'false'
-    if ($AuthType -eq 'oidc') {
-        Write-Host 'setting to use OpenID Connect for authentication'
-        $winAuth = 'false'
-        $anonAuth = 'true'
-    }
-
-    &$appcmd set config "$SiteName" `
-        -section:system.webServer/security/authentication/anonymousAuthentication `
-        /enabled:$anonAuth `
-        /apphostconfig:"$configPath"
-
-    &$appcmd set config "$SiteName" `
-        -section:system.webServer/security/authentication/windowsAuthentication `
-        /enabled:$winAuth `
-        /apphostconfig:"$configPath"
-
-}
-
-function Config-IIS-Auth {
-    param(
-        [String]$SiteName,
-
-        [ValidateSet('windows', 'oidc')]
-        [String]
-        $AuthType = 'windows'
-    )
-
-    $appcmd = $env:SystemRoot + '\system32\inetsrv\appcmd.exe'
-
-    # if we are using OIDC for authentication then modify the web.config
-    # file for PRS.CMS.Web.Intranet
-    Write-Host "the AuthType is $AuthType"
-    $winAuth = 'true'
-    $anonAuth = 'false'
-    if ($AuthType -eq 'oidc') {
-        Write-Host 'setting to use OpenID Connect for authentication'
-        $winAuth = 'false'
-        $anonAuth = 'true'
-    }
-
-    & "$appcmd" set config "$SiteName" `
-        -section:system.webServer/security/authentication/anonymousAuthentication `
-        /enabled:$anonAuth
-
-    & "$appcmd" set config "$SiteName" `
-        -section:system.webServer/security/authentication/windowsAuthentication `
-        /enabled:$winAuth
-
 }
 
 function Start-IISExpress {
@@ -639,120 +377,6 @@ function Zip-Directory {
     }
 }
 
-function Package-SqlFiles {
-    param (
-        [string]$packagePath
-    )
-
-    $destPath = (Combine-Paths -Paths $packagePath, 'CaseMaxSolutions', 'database')
-
-    # move all of these directories - we will later go back
-    # and look at files to make sure they should be kept
-    $paths = @('create', 'diff-reports', 'load', 'purge', 'scramble')
-
-    foreach ($_ in $paths) {
-        $p = (Join-Path -Path '.' -ChildPath $_)
-        if (Test-Path -Path $p) {
-            Write-Host "copying $p directory"
-            Copy-Item -Path $p -Destination $destPath -Recurse -Force
-        }
-    }
-
-    $p = Combine-Paths 'upgrade', 'Workpoint'
-    if (Test-Path -Path $p) {
-        Copy-Item -Path $p `
-            -Destination (Combine-Paths $destPath, 'upgrade', 'Workpoint') `
-            -Recurse `
-            -Force
-    }
-    
-    # Excluding all of the 12.x thru 19.x from packaging because I don't need those files
-    # for any environment and they just bloat the number of files that windows installer
-    # needs to update.  If this value is changed make sure that seed data file 
-    # database\create\cms\data\version.sql indicates a new database would be created at 
-    # that version or later.
-    Write-Host "getting any cms directories greater than or equal to 20.x files"
-    $dirs = Get-ChildItem -Path ".\upgrade\cms" -Directory | `
-        Where-Object { ($_.Name -match "^2[0-9].*") -eq $true }
-    
-    foreach ($dir in $dirs) {
-        Write-Host "packaging up $($dir.Name)"
-        Copy-Item -Path $dir.FullName -Destination "$destPath\upgrade\cms\$($dir.Name)" -Recurse -Force
-    }
-
-    # want to exclude files with a suffix of _DEV because they are only needed on build/dev 
-    # machines and we don't want them getting into customer systems
-    Write-Host "removing _DEV.sql files"
-    Get-ChildItem -Path "$destPath\upgrade" -Recurse -File | `
-        Where-Object { $_.Name.EndsWith("_DEV.sql") } | `
-        Remove-Item 
-
-    # this file should not be on disk and definitely should not make it into the package
-    # directory for the installer to find
-    Get-ChildItem -Path "*\License.xml" -Recurse | Remove-Item -Force
-}
-
-function Stop-Workpoint {
-    ..\Repository.Shared\workpoint-stop.ps1 -RootPath $rootPath
-}
-
-function Drop-Databases {
-    Invoke-Build -Task Drop -File "..\Repository.Shared\manage-databases.build.ps1"
-}
-
-function Refresh-Databases {
-    param (
-        [String[]]
-        $Databases = (property Databases),
-
-        [ValidateSet('full', 'quick', 'diff')]
-        [String]
-        $UpgradeType = 'full',
-
-        [String]
-        $SqlServerName = (property SqlServerName),
-        
-        [ValidateSet('Debug', 'Release')]
-        [String]
-        $VsConfiguration = 'Debug',
-    
-        [String]
-        $DbInstallerPsFile = ([System.IO.Path]::Combine('..', 'Repository.Shared', 'cms-dbinstaller.ps1'))
-    )
-
-    Invoke-Build -Task Drop, Restore -File "..\Repository.Shared\manage-databases.build.ps1" `
-        -SqlServerName $SqlServerName `
-        -Databases $Databases 
-    
-    Invoke-Build -Task Upgrade -File $DbInstallerPsFile `
-        -UpgradeType $UpgradeType `
-        -VsConfiguration $VsConfiguration
-}
-
-function Copy-AssembliesToWorkpoint {
-    param (
-        [String]$WpBinPath,
-        [String]$Project,
-        [String]$VsBinPath
-    )
-
-    $dest = (Join-Path $WpBinPath 'cms')
-    New-Directory -Path $dest
-
-    # need to get all the DLLs from CaseMax directory because it will include assemblies
-    # that are not being referenced by firm specific Scripts project
-    if (Test-Path -Path "..\.external-bin\CMS\Workpoint.NET\server\bin\cms"){
-        Write-Host "copying assemblies from CaseMax external-bin"
-        Copy-Item -Path "..\.external-bin\CMS\Workpoint.NET\server\bin\*" -Destination $WpBinPath -Recurse -Force
-    }
-
-    Package-Directory -Project $Project -VsBinPath $VsBinPath -Destination $dest
-    # don't want the workpoint dlls in the cms folder because they will already exists 
-    # in the bin of the workpoint install
-    Get-ChildItem -Path "$dest\*" -File -Include 'Workpoint*', 'MSEL*', 'Northwoods.GoWPF.dll' |
-        Remove-Item
-
-}
 
 function Install-NPM {
     
@@ -787,6 +411,7 @@ function Invoke-Webpack {
         node "$webpackPath" --mode=$Mode
     }
 }
+
 function Remove-DuplicateFiles {
     param (
         [string]$Path,
@@ -819,109 +444,6 @@ function Remove-DuplicateFiles {
         }
 }
 
-function Setup-RegistryConnectionString {
-    param (
-      [Parameter(Mandatory=$false)]
-      [String]
-      $SqlServerName = 'localhost',
-        
-      [Parameter(Mandatory=$false)]
-      [String]
-      $DatabaseName = 'cms',
-      
-      [Parameter(Mandatory=$false)]
-      [ValidateSet('x64', 'x86')]
-      [String]
-      $Bitness = 'x64'
-    )
-
-    $path = "HKLM:\SOFTWARE\CaseMaxSolutions\ConnectionStrings\$DatabaseName"
-    if ($Bitness -eq 'x86'){
-        $path = "HKLM:\SOFTWARE\WOW6432Node\CaseMaxSolutions\ConnectionStrings\$DatabaseName"
-    }
-
-    # only create registry key if it does not exist - creating key here requires admin permission
-    if (!(Test-Path -Path $path)){
-        New-Item -Path $path -Force
-        New-ItemProperty -Path $path -PropertyType String -Name "Initial Catalog" -Value $DatabaseName
-        New-ItemProperty -Path $path -PropertyType String -Name "Integrated Security" -Value "SSPI"
-        New-ItemProperty -Path $path -PropertyType String -Name "Server" -Value $SqlServerName
-    }
-
-    # only update if it doesn't match - requires elevated permissions to update
-    $val = (Get-ItemProperty -Path $path).Server
-    if ($val -ne $SqlServerName){
-        Set-ItemProperty -Path $path -Name "Server" -Value $SqlServerName
-    }
-
-}
-
-function Config-ExtBinIISExpress {
-
-    $rootPath = (Resolve-Path -Path '..')
-    $configPath = (Resolve-Path -Path "$rootPath\Repository.Shared\iisexpress-extbin.config")
-
-    Write-Host "rootPath = $rootPath"
-    Write-Host "configPath = $configPath"
-
-    # replace the [ROOT.DIR] text and copy the output to the location visual studio expects
-    (Get-Content -Path $configPath) |
-        ForEach-Object {$_ -Replace '\[ROOT.DIR\]', "$rootPath"} |
-        Out-File -FilePath "$rootPath\.external-bin\applicationhost.config" -Encoding utf8 -Force
-}
-
-function Restart-ExtBinIISExpress {
-
-    $rootPath = (Resolve-Path -Path '..')
-    
-    # this copies the iisexpress.config file from Repository.Shared 
-    # and replaces ROOT.DIR with actual path
-    Config-ExtBinIISExpress 
-
-    # this makes sure these two websites have been stopped
-    Stop-ExtBinIISExpress
-
-    $cmsProc = Start-Process -FilePath 'C:\Program Files\IIS Express\iisexpress.exe' `
-        -ArgumentList "/config:$rootPath\.external-bin\applicationhost.config /site:`"PRS.CMS.Web.Intranet`""`
-        -WindowStyle Hidden `
-        -PassThru
-
-    $pwProc = Start-Process -FilePath 'C:\Program Files\IIS Express\iisexpress.exe' `
-        -ArgumentList "/config:$rootPath\.external-bin\applicationhost.config /site:`"PRS.CMS.PaperWise.Intranet`""`
-        -WindowStyle Hidden `
-        -PassThru
-
-    Write-Host "started IISExpress for PRS.CMS.Web.Intranet with PID $($cmsProc.Id) and PRS.CMS.PaperWise.Intranet with PID $($pwProc.Id)"
-
-}
-
-function Stop-ExtBinIISExpress {
-    # this makes sure these two websites have been stopped
-    Stop-IISExpress -Project 'PRS.CMS.Web.Intranet'
-    Stop-IISExpress -Project 'PRS.CMS.PaperWise.Intranet'
-}
-
-function Start-AzureStorageEmulator {
-    param(
-        $ExePath = "..\.external-bin\AzureStorageEmulator\AzureStorageEmulator.exe",
-        $SqlServerName
-    )
-
-    # https://docs.microsoft.com/en-us/azure/storage/common/storage-use-emulator
-    & "$ExePath" init -server "$SqlServerName"
-    & "$ExePath" start
-}
-
-function Create-AzureStorageContainer {
-    param (
-        [string]$ContainerName,
-        [datetime]$TokenExpiresAt
-    )
-    
-    $token = (& "$rootPath\Repository.Shared\az-container-create.ps1" -ContainerName $ContainerName -TokenExpiresAt $TokenExpiresAt)
-    Write-Output $token
-}
-
 function Clean-DotNet {
     param(
         [string]$Solution,
@@ -940,29 +462,6 @@ function Clean-DotNet {
         dotnet clean "$Solution.sln" `
             --configuration $VsConfiguration 
     }
-}
-
-function Clean-Solution {
-    param(
-        [string]$Solution,
-        [string]$VsConfiguration,
-        [string]$Platform = 'Any CPU'
-    )
-
-    if (Test-Path -Path '.\.build') {
-        Remove-Item -Path .\.build -Recurse -Force -ErrorAction SilentlyContinue
-    }
-
-    # MSBuild will not get rid of obj files 
-    Remove-CompilerFiles
-
-    exec {
-        MSBuild "$Solution.sln" /target:Clean `
-            /property:Configuration=$VsConfiguration `
-            /property:Platform="$Platform" `
-            /property:RestorePackages=false
-    }
-
 }
 
 function Build-DotNet {
@@ -985,37 +484,4 @@ function Build-DotNet {
             -p:CreateDocumentationFile="true" `
             -p:GeneratePackageOnBuild="true"
     }
-
-    # This is needed because legacy MSBuild project using Analyzers are dropping files related to 
-    # Code Analysis in the bin directory.  Don't want those to get packaged up. 
-    Remove-CodeAnalysisOutputFiles
-}
-
-function Build-Solution {
-    param(
-        [string]$Solution,
-        [string]$VsConfiguration,
-        [string]$Platform = 'Any CPU'
-    )
-
-    Restore-NuGet -Solution "$Solution"
-   
-    #
-    # CreateDocumentationFile - using that name because it is supporting the current MSBuild, 
-    # the .NET Core SDK property of GenerateDocumentationFile, and not generating Xml Doc file 
-    # for tests projects.  If the tests projects was not around then we would just use the property
-    # GenerateDocumenationFile and skip the conditional <PropertyGroup> in the csproj file.
-    
-    exec {
-        MSBuild "$Solution.sln" /target:Build `
-            /property:Configuration=$VsConfiguration `
-            /property:Platform="$Platform" `
-            /property:CreateDocumentationFile="true" `
-            /property:GeneratePackageOnBuild="true" `
-            /property:CMS_BuildType="$BuildType"
-    }
-    
-    # This is needed because legacy MSBuild project using Analyzers are dropping files related to 
-    # Code Analysis in the bin directory.  Don't want those to get packaged up. 
-    Remove-CodeAnalysisOutputFiles
 }
