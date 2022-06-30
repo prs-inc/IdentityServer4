@@ -31,9 +31,6 @@ $CompanyName = 'CaseMaxSolutions'
 $vcsRevision = ''
 $vcsBranch = ''
 
-$releasePath = ''
-$releaseOutputPath = ''
-
 $now = (Get-Date)
 $copyright = "Copyright 1999-$($now.Year) © CaseMaxSolutions"
 $knownas = ''
@@ -85,13 +82,6 @@ $PackageVersion = '0.0.0-alpha.0'
 Add-BuildTask -Name Init -Jobs {
     _Get-VCSInfo
     Write-Host "building rev $vcsRevision on branch $vcsBranch for company $CompanyName"
-
-    # If this structure changes then buildserver-utils/dev/IdentityServer4/copy-to-qa-download.ps1 needs
-    # to be updated.
-    $childPath = (Combine-Paths -Paths "releases", "$ProductName")
-
-    $script:releasePath = (Join-Path -Path (Get-Location).Drive.Root -ChildPath "$childPath")
-    $script:releaseOutputPath = (Join-Path -Path $releasePath -ChildPath "$vcsBranch-$BuildType")
 
     _Get-VersionFromXml
 }
@@ -359,12 +349,17 @@ function Move-SolutionArtifacts {
 }
 
 function Move-ToReleaseFolder {
-    if (!(Test-Path -Path $releasePath)){
-        Write-Host "creating directory $releasePath"
-        New-Item -Path $releasePath -ItemType "directory"
-    }
 
-    New-Directory -Path $releaseOutputPath
+    # If this structure changes then buildserver-utils/dev/IdentityServer4/copy-to-qa-download.ps1 needs
+    # to be updated.
+    $childPath = (Combine-Paths -Paths "releases", "$ProductName")
+
+    $releasePath = (Join-Path -Path (Get-Location).Drive.Root -ChildPath "$childPath")
+    $releaseOutputPath = (Join-Path -Path $releasePath -ChildPath "$vcsBranch-$BuildType")
+    if (!(Test-Path -Path $releasePath)){
+        Write-Host "creating directory $releaseOutputPath"
+        New-Item -Path $releaseOutputPath -ItemType "directory"
+    }
     
     Write-Host "moving files from $rootArtifactsPath for $BuildType to release folder $releaseOutputPath"
     Move-DirectoryContent -Path $rootArtifactsPath -Destination $releaseOutputPath
