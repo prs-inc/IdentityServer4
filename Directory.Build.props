@@ -5,13 +5,13 @@
     <AssemblyVersion>6.0.1</AssemblyVersion>
     <Company>CaseMaxSolutions</Company>
     <Copyright>Copyright 1999-2022 © CaseMaxSolutions</Copyright>
-    <FileVersion>6.0.1.171</FileVersion>
-    <InformationalVersion>6.0.1-alpha.10216</InformationalVersion>
+    <FileVersion>6.0.1.184</FileVersion>
+    <InformationalVersion>6.0.1</InformationalVersion>
     <Product>IdentityServer4 6.0.0</Product>
-    <PackageVersion>6.0.1-alpha.10216</PackageVersion>
+    <PackageVersion>6.0.1</PackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- used in PackageReference[@Version] for Solutions in this repository that put nupkg files in the ./.build/packages directory -->
-    <SolutionVersion>6.0.1-alpha*</SolutionVersion>
+    <SolutionVersion>6.0.1</SolutionVersion>
   </PropertyGroup>
 </Project>
