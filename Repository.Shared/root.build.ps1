@@ -125,22 +125,8 @@ Add-BuildTask -Name Build-All -Jobs DependenciesUpdate, Init, Clean, UpdateAssem
     # their original directory.
     Move-SolutionArtifacts
     
-    if ($BuildType -ne 'dev'){
-
-        # this file should only exist for CaseMax root.  There is some special organizing of
-        # the root artifacts path
-        if (Test-Path -Path "$root\build-all-organize.ps1"){
-            Set-Location $root
-            .\build-all-organize.ps1 -ArtifactsPath $rootArtifactsPath -BuildType $BuildType
-            Set-Location $BuildRoot
-        }
-
-        Move-ToReleaseFolder
-        
-        if ($BuildType -eq 'rc'){
-            Commit-VCS 
-        }
-
+    if ($BuildType -eq 'rc'){
+        Commit-VCS
     }
 
 }

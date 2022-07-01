@@ -54,7 +54,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build-root", "build-root", 
 		..\NuGet.config = ..\NuGet.config
 		..\Directory.Build.props = ..\Directory.Build.props
 		..\version.xml = ..\version.xml
-		..\build-all-organize.ps1 = ..\build-all-organize.ps1
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build-shared", "build-shared", "{37C91239-0E66-47CE-9D82-2758A0F161E8}"
