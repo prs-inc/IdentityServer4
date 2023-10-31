@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28803.352
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31912.275
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hosts", "hosts", "{9D183759-9418-4BCF-9DAC-9AB7ADF6BD97}"
 EndProject
@@ -54,6 +54,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build-root", "build-root", 
 		..\NuGet.config = ..\NuGet.config
 		..\Directory.Build.props = ..\Directory.Build.props
 		..\version.xml = ..\version.xml
+		..\global.json = ..\global.json
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build-shared", "build-shared", "{37C91239-0E66-47CE-9D82-2758A0F161E8}"

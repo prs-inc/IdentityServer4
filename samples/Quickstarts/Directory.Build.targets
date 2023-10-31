@@ -1,7 +1,7 @@
 <Project>
 
     <PropertyGroup>
-        <AspNetVersion>6.0.0</AspNetVersion>
+        <AspNetVersion>7.0.0</AspNetVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -17,7 +17,7 @@
         <PackageReference Update="Microsoft.EntityFrameworkCore.Design" Version="$(AspNetVersion)" />
 
         <PackageReference Update="Newtonsoft.Json" Version="13.0.1" />
-        <PackageReference Update="System.IdentityModel.Tokens.Jwt" Version="6.10.0" />
+        <PackageReference Update="System.IdentityModel.Tokens.Jwt" Version="6.15.1" />
 
         <PackageReference Update="Serilog.AspNetCore" Version="3.2.0" />
     </ItemGroup>
