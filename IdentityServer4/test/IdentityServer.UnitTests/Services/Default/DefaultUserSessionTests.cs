@@ -147,8 +147,8 @@ namespace IdentityServer.UnitTests.Services.Default
             cookieContainer.SetCookies(new Uri("http://server"), string.Join(",", cookies));
             _mockHttpContext.HttpContext.Response.Headers.Clear();
 
-            string cookie = cookieContainer.GetCookieHeader(new Uri("http://server"));
-            _mockHttpContext.HttpContext.Request.Headers.Add("Cookie", cookie);
+            var cookie = cookieContainer.GetCookieHeader(new Uri("http://server"));
+            _mockHttpContext.HttpContext.Request.Headers["Cookie"] = cookie;
 
             await _subject.RemoveSessionIdCookieAsync();
 

@@ -11,16 +11,20 @@ using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using System.Threading.Tasks;
+
 using FluentAssertions;
+
 using IdentityModel;
-using IdentityModel.Client;
+
 using IdentityServer.IntegrationTests.Common;
 using IdentityServer4;
 using IdentityServer4.Configuration;
 using IdentityServer4.Models;
 using IdentityServer4.Test;
+
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+
 using Xunit;
 
 namespace IdentityServer.IntegrationTests.Endpoints.Authorize
@@ -47,7 +51,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
 
             _rsaKey = CryptoHelper.CreateRsaSecurityKey();
 
-            _mockPipeline.Clients.AddRange(new Client[] 
+            _mockPipeline.Clients.AddRange(new[] 
             {
                 _client = new Client
                 {
@@ -143,7 +147,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
             {
                 SubjectId = "bob",
                 Username = "bob",
-                Claims = new Claim[]
+                Claims = new[]
                 {
                     new Claim("name", "Bob Loblaw"),
                     new Claim("email", "bob@loblaw.com"),
@@ -156,14 +160,14 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
                 new IdentityResources.Profile(),
                 new IdentityResources.Email()
             });
-            _mockPipeline.ApiResources.AddRange(new ApiResource[] {
+            _mockPipeline.ApiResources.AddRange(new[] {
                 new ApiResource
                 {
                     Name = "api",
                     Scopes = { "api1", "api2" }
                 }
             });
-            _mockPipeline.ApiScopes.AddRange(new ApiScope[] {
+            _mockPipeline.ApiScopes.AddRange(new[] {
                 new ApiScope
                 {
                     Name = "api1"

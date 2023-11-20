@@ -8,7 +8,6 @@ using IdentityServer.UnitTests.Common;
 using IdentityServer4.Configuration;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
-using Microsoft.AspNetCore.Authentication;
 using Xunit;
 
 namespace IdentityServer.UnitTests.Extensions
@@ -43,7 +42,7 @@ namespace IdentityServer.UnitTests.Extensions
             {
                 EmitScopesAsSpaceDelimitedStringInJwt = false
             };
-            var payload = _token.CreateJwtPayloadDictionary(new SystemClock(), options, TestLogger.Create<JwtPayloadCreationTests>());
+            var payload = _token.CreateJwtPayloadDictionary(TimeProvider.System, options, TestLogger.Create<JwtPayloadCreationTests>());
 
             payload.Should().NotBeNull();
             var scopes = (string[])payload[JwtClaimTypes.Scope];
@@ -62,7 +61,7 @@ namespace IdentityServer.UnitTests.Extensions
                 EmitScopesAsSpaceDelimitedStringInJwt = true
             };
             
-            var payload = _token.CreateJwtPayloadDictionary(new SystemClock(), options, TestLogger.Create<JwtPayloadCreationTests>());
+            var payload = _token.CreateJwtPayloadDictionary(TimeProvider.System, options, TestLogger.Create<JwtPayloadCreationTests>());
 
             payload.Should().NotBeNull();
             var scopes = payload.Where(c => c.Key == JwtClaimTypes.Scope).ToList();

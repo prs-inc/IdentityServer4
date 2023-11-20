@@ -17,7 +17,7 @@ namespace IdentityServer.UnitTests.Extensions
             var ctx = new DefaultHttpContext();
             ctx.Request.Scheme = "http";
             ctx.Request.Host = new HostString("foo");
-            ctx.Request.Headers.Add("Origin", "http://bar");
+            ctx.Request.Headers["Origin"] = "http://bar";
 
             ctx.Request.GetCorsOrigin().Should().Be("http://bar");
         }
@@ -28,7 +28,7 @@ namespace IdentityServer.UnitTests.Extensions
             var ctx = new DefaultHttpContext();
             ctx.Request.Scheme = "http";
             ctx.Request.Host = new HostString("foo");
-            ctx.Request.Headers.Add("Origin", "http://foo");
+            ctx.Request.Headers["Origin"] = "http://foo";
 
             ctx.Request.GetCorsOrigin().Should().BeNull();
         }

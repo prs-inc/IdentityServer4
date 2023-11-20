@@ -33,7 +33,7 @@ namespace IdentityServer4.Services
         /// <summary>
         ///  The clock
         /// </summary>
-        protected readonly ISystemClock Clock;
+        protected readonly TimeProvider Clock;
 
         /// <summary>
         /// The options
@@ -48,7 +48,7 @@ namespace IdentityServer4.Services
         /// <param name="options">The options.</param>
         /// <param name="logger">The logger.</param>
         public DefaultTokenCreationService(
-            ISystemClock clock,
+            TimeProvider clock,
             IKeyMaterialService keys,
             IdentityServerOptions options,
             ILogger<DefaultTokenCreationService> logger)

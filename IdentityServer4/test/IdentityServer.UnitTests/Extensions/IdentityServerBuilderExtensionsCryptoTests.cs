@@ -21,8 +21,7 @@ namespace IdentityServer.UnitTests.Extensions
             IServiceCollection services = new ServiceCollection();
             IIdentityServerBuilder identityServerBuilder = new IdentityServerBuilder(services);
 
-            String json =
-            @"{
+            var json = @"{
                 ""alg"" : ""RS256"",
                 ""kty"" : ""RSA"",
                 ""use"" : ""sig"",
@@ -36,8 +35,8 @@ namespace IdentityServer.UnitTests.Extensions
                 ""qi"" :  ""w4KdmiDN1GtK71JxaasqmEKPNfV3v2KZDXKnfyhUsdx/idKbdTVjvMOkxFPJ4FqV4yIVn06f3QHTm4NEG18Diqxsrzd6kXQIHOa858tLsCcmt9FoGfrgCFgVceh3K/Zah/r8rl9Y61u0Z1kZumwMvFpFE+mVU01t9HgTEAVkHTc=""
             }";
 
-            JsonWebKey jsonWebKey = new JsonWebKey(json);
-            SigningCredentials credentials = new SigningCredentials(jsonWebKey, jsonWebKey.Alg);
+            var jsonWebKey = new JsonWebKey(json);
+            var credentials = new SigningCredentials(jsonWebKey, jsonWebKey.Alg);
             identityServerBuilder.AddSigningCredential(credentials);
         }
 
@@ -143,7 +142,7 @@ namespace IdentityServer.UnitTests.Extensions
                 ECCurve.CreateFromOid(Oid.FromOidValue(curveOid, OidGroup.All))));
             var parameters = key.ECDsa.ExportParameters(true);
 
-            var jsonWebKeyFromECDsa = new JsonWebKey()
+            var webKey = new JsonWebKey
             {
                 Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve,
                 Use = "sig",
@@ -155,7 +154,7 @@ namespace IdentityServer.UnitTests.Extensions
                 Crv = crv.Replace("-", string.Empty),
                 Alg = SecurityAlgorithms.EcdsaSha256
             };
-            Assert.Throws<InvalidOperationException>(() => identityServerBuilder.AddSigningCredential(jsonWebKeyFromECDsa, alg));
+            Assert.Throws<InvalidOperationException>(() => identityServerBuilder.AddSigningCredential(webKey, alg));
         }
     }
 }

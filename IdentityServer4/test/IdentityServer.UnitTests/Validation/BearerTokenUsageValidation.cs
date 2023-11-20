@@ -49,7 +49,7 @@ namespace IdentityServer.UnitTests.Validation
         {
             var ctx = new DefaultHttpContext();
             ctx.Request.Method = "GET";
-            ctx.Request.Headers.Add("Authorization", new string[] { "Foo Bar" });
+            ctx.Request.Headers["Authorization"] = new string[] { "Foo Bar" };
 
             var validator = new BearerTokenUsageValidator(TestLogger.Create<BearerTokenUsageValidator>());
             var result = await validator.ValidateAsync(ctx);
@@ -63,7 +63,7 @@ namespace IdentityServer.UnitTests.Validation
         {
             var ctx = new DefaultHttpContext();
             ctx.Request.Method = "GET";
-            ctx.Request.Headers.Add("Authorization", new string[] { "Bearer" });
+            ctx.Request.Headers["Authorization"] = new string[] { "Bearer" };
 
             var validator = new BearerTokenUsageValidator(TestLogger.Create<BearerTokenUsageValidator>());
             var result = await validator.ValidateAsync(ctx);
@@ -77,7 +77,7 @@ namespace IdentityServer.UnitTests.Validation
         {
             var ctx = new DefaultHttpContext();
             ctx.Request.Method = "GET";
-            ctx.Request.Headers.Add("Authorization", new string[] { "Bearer           " });
+            ctx.Request.Headers["Authorization"] =  new string[] { "Bearer           " };
 
             var validator = new BearerTokenUsageValidator(TestLogger.Create<BearerTokenUsageValidator>());
             var result = await validator.ValidateAsync(ctx);
@@ -91,7 +91,7 @@ namespace IdentityServer.UnitTests.Validation
         {
             var ctx = new DefaultHttpContext();
             ctx.Request.Method = "GET";
-            ctx.Request.Headers.Add("Authorization", new string[] { "Bearer token" });
+            ctx.Request.Headers["Authorization"] = new string[] { "Bearer token" };
 
             var validator = new BearerTokenUsageValidator(TestLogger.Create<BearerTokenUsageValidator>());
             var result = await validator.ValidateAsync(ctx);

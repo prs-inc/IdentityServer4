@@ -30,7 +30,7 @@ namespace IdentityServer4.Extensions
         /// <returns></returns>
         /// <exception cref="Exception">
         /// </exception>
-        public static Dictionary<string, object> CreateJwtPayloadDictionary(this Token token, ISystemClock clock, IdentityServerOptions options, ILogger logger)
+        public static Dictionary<string, object> CreateJwtPayloadDictionary(this Token token, TimeProvider clock, IdentityServerOptions options, ILogger logger)
         {
             try
             {
@@ -39,7 +39,7 @@ namespace IdentityServer4.Extensions
                     { JwtClaimTypes.Issuer, token.Issuer }
                 };
 
-                var now = clock.UtcNow.ToUnixTimeSeconds();
+                var now = clock.GetUtcNow().ToUnixTimeSeconds();
                 var exp = now + token.Lifetime;
 
                 payload.Add(JwtClaimTypes.NotBefore, now);

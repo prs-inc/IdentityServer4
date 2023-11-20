@@ -45,9 +45,9 @@ namespace IdentityServer.UnitTests.Validation.Secrets
         {
             var context = new DefaultHttpContext();
 
-            var headerValue = string.Format("Basic {0}",
+            var headerValue = string.Format("Basic {0}", 
                 Convert.ToBase64String(Encoding.UTF8.GetBytes("client:secret")));
-            context.Request.Headers.Add("Authorization", new StringValues(headerValue));
+            context.Request.Headers["Authorization"] = headerValue;
 
 
             var secret = await _parser.ParseAsync(context);
@@ -65,7 +65,7 @@ namespace IdentityServer.UnitTests.Validation.Secrets
 
             var headerValue = string.Format("Basic {0}",
                 Convert.ToBase64String(Encoding.UTF8.GetBytes("client:")));
-            context.Request.Headers.Add("Authorization", new StringValues(headerValue));
+            context.Request.Headers["Authorization"] = headerValue;
 
             var secret = await _parser.ParseAsync(context);
 
@@ -80,7 +80,7 @@ namespace IdentityServer.UnitTests.Validation.Secrets
         {
             var context = new DefaultHttpContext();
 
-            context.Request.Headers.Add("Authorization", new StringValues(string.Empty));
+            context.Request.Headers["Authorization"] = string.Empty;
 
             var secret = await _parser.ParseAsync(context);
 
@@ -98,7 +98,7 @@ namespace IdentityServer.UnitTests.Validation.Secrets
 
             var headerValue = string.Format("Basic {0}",
                 Convert.ToBase64String(Encoding.UTF8.GetBytes(credential)));
-            context.Request.Headers.Add("Authorization", new StringValues(headerValue));
+            context.Request.Headers["Authorization"] = headerValue;
 
             var secret = await _parser.ParseAsync(context);
             secret.Should().BeNull();
@@ -115,7 +115,7 @@ namespace IdentityServer.UnitTests.Validation.Secrets
 
             var headerValue = string.Format("Basic {0}",
                 Convert.ToBase64String(Encoding.UTF8.GetBytes(credential)));
-            context.Request.Headers.Add("Authorization", new StringValues(headerValue));
+            context.Request.Headers["Authorization"] = headerValue;
 
             var secret = await _parser.ParseAsync(context);
             secret.Should().BeNull();
@@ -127,7 +127,7 @@ namespace IdentityServer.UnitTests.Validation.Secrets
         {
             var context = new DefaultHttpContext();
 
-            context.Request.Headers.Add("Authorization", new StringValues("Basic "));
+            context.Request.Headers["Authorization"] = "Basic ";
 
             var secret = await _parser.ParseAsync(context);
 
@@ -140,7 +140,7 @@ namespace IdentityServer.UnitTests.Validation.Secrets
         {
             var context = new DefaultHttpContext();
 
-            context.Request.Headers.Add("Authorization", new StringValues("Unknown"));
+            context.Request.Headers["Authorization"] = "Unknown";
 
             var secret = await _parser.ParseAsync(context);
 
@@ -153,7 +153,7 @@ namespace IdentityServer.UnitTests.Validation.Secrets
         {
             var context = new DefaultHttpContext();
 
-            context.Request.Headers.Add("Authorization", new StringValues("Basic somerandomdata"));
+            context.Request.Headers["Authorization"] = "Basic somerandomdata";
 
             var secret = await _parser.ParseAsync(context);
 
@@ -168,7 +168,7 @@ namespace IdentityServer.UnitTests.Validation.Secrets
 
             var headerValue = string.Format("Basic {0}",
                 Convert.ToBase64String(Encoding.UTF8.GetBytes("client")));
-            context.Request.Headers.Add("Authorization", new StringValues(headerValue));
+            context.Request.Headers["Authorization"] = headerValue;
 
             var secret = await _parser.ParseAsync(context);
 
