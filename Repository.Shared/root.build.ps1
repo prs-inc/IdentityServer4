@@ -135,7 +135,7 @@ Add-BuildTask -Name UpdateAssemblyInfo -Jobs Init, {
     Write-CommonAssemblyInfo
 }
 
-Add-BuildTask -Name Build-Package -Jobs DependenciesUpdate, Init, Clean, UpdateAssemblyInfo, Setup-IIS, Setup-Workpoint, {
+Add-BuildTask -Name Build-Package -Jobs DependenciesUpdate, Init, Clean, UpdateAssemblyInfo, {
     foreach ($_ in $Solutions){
         Invoke-SlnBuild -Solution $_ -Target 'Build', 'Setup', 'Package'
     }

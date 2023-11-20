@@ -1,9 +1,9 @@
 <Project>
 
   <PropertyGroup>
-    <FrameworkVersion>7.0.0</FrameworkVersion>
-    <ExtensionsVersion>7.0.0</ExtensionsVersion>
-    <EntityFrameworkVersion>7.0.0</EntityFrameworkVersion>
+    <FrameworkVersion>8.0.0</FrameworkVersion>
+    <ExtensionsVersion>8.0.0</ExtensionsVersion>
+    <EntityFrameworkVersion>8.0.0</EntityFrameworkVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,8 +29,8 @@
     
     <!--misc -->
     <PackageReference Update="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Update="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.15.1" />
-    <PackageReference Update="System.IdentityModel.Tokens.Jwt" Version="6.15.1" />
+    <PackageReference Update="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="7.0.3" />
+    <PackageReference Update="System.IdentityModel.Tokens.Jwt" Version="7.0.3" />
     <PackageReference Update="System.Security.Principal.Windows" Version="5.0.0" />
     <PackageReference Update="AutoMapper" Version="12.0.0" />
     

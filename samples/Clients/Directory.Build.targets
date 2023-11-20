@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <AspNetVersion>7.0.0</AspNetVersion>    
+    <AspNetVersion>8.0.0</AspNetVersion>    
   </PropertyGroup>
 
   <ItemGroup>
