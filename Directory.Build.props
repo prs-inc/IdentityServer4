@@ -4,14 +4,14 @@
   <PropertyGroup>
     <AssemblyVersion>8.0.1</AssemblyVersion>
     <Company>CaseMaxSolutions</Company>
-    <Copyright>Copyright 1999-2023 © CaseMaxSolutions</Copyright>
-    <FileVersion>8.0.1.2</FileVersion>
-    <InformationalVersion>8.0.1-alpha.65</InformationalVersion>
+    <Copyright>Copyright 1999-2024 © CaseMaxSolutions</Copyright>
+    <FileVersion>8.0.1.1226</FileVersion>
+    <InformationalVersion>8.0.1</InformationalVersion>
     <Product>IdentityServer4 8.0.0</Product>
-    <PackageVersion>8.0.1-alpha.65</PackageVersion>
+    <PackageVersion>8.0.1</PackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- used in PackageReference[@Version] for Solutions in this repository that put nupkg files in the ./.build/packages directory -->
-    <SolutionVersion>8.0.1-alpha*</SolutionVersion>
+    <SolutionVersion>8.0.1</SolutionVersion>
   </PropertyGroup>
 </Project>
