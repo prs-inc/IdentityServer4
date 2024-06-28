@@ -73,7 +73,7 @@ param(
 # as the one to https://aka.ms
 [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
 
-$invokeBuildVersion = '5.8.6'
+$invokeBuildVersion = '5.11.2'
 Write-Host "checking to see if InvokeBuild $invokeBuildVersion module is installed"
 if (!(Get-Module -Name 'InvokeBuild' -ListAvailable | Where-Object {$_.Version -eq $invokeBuildVersion})) {
     Write-Host "installing InvokeBuild $invokeBuildVersion module"
