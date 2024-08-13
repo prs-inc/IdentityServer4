@@ -10,6 +10,9 @@ param(
 
 dotnet tool restore
 
+# need to pull this down for the ps1 files in the .teamcity directory
+Download-AzCopy
+
 # tell NuGet to use the local sources that the VS/Rider build of packages is output to
 Add-NuGetPackageSource `
     -Name "Solution Packages" `
