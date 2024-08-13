@@ -60,7 +60,7 @@ function Copy-BinariesToAzureSoftwareLibrary {
     $filename = [System.IO.Path]::GetFileName($path)
     $destUrl = "$softwareLibraryUrl/$filename$softwareLibraryWriteToken"
 
-    $azCopyExe = (Download-AzCopy)
+    $azCopyExe = (Find-AzCopy)
 
     Write-Host "upload $SourceFile as $filename to container $softwareLibraryUrl"
     & "$azCopyExe" cp `
