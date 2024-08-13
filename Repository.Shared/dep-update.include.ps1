@@ -21,6 +21,39 @@ if ($null -eq (Get-PSRepository |Where-Object {$_.Name -eq 'PSGallery' -and $_.I
     Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
 }
 
+# this local directory will be used if present to save traffic to/from Azure because
+# that is much slower than pulling from a local file
+if ($null -ne $env:SOFTWARE_LIBRARY){
+    $localCachePath = $env:SOFTWARE_LIBRARY
+    Write-Host "SOFTWARE_LIBRARY in env variable is $localCachePath"
+}
+else {
+    $localCachePath = Join-Path ((Get-Location).Drive.Root) ".software-library"
+    Write-Host "no env variable for SOFTWARE_LIBRARY - using path on local drive $localCachePath"
+}
+
+if (!(Test-Path -Path $localCachePath)) {
+    Write-Host "did not find $localCachePath on current disk - so using directory in user profile"
+    $folderPath = [System.Environment+SpecialFolder]::UserProfile
+    $userprofile = [System.Environment]::GetFolderPath($folderPath)
+    $localCachePath = Join-Path $userprofile ".software-library"
+
+    if (!(Test-Path -Path $localCachePath)){
+        Write-Host "creating $localCachePath on current disk to cache software-library downloads"
+        New-Item -Path $localCachePath -ItemType Directory
+    }
+}
+
+
+# This will be set if we are pulling down from Azure because we will get the current AzCopy.exe
+# by downloading from MS and then extracting.  The path with vary depending on the version downloaded.
+$azcopyPath = ''
+
+# make sure local .external-bin exists
+if (!(Test-Path -Path '.external-bin')) { 
+    New-Item -Path '.external-bin' -ItemType directory 
+}
+
 function Add-NuGetPackageSource {
     param(
         [string]$Name,
@@ -31,7 +64,13 @@ function Add-NuGetPackageSource {
     # operations since .net interop code will be running in a different directory
     if (!(Test-Path -Path 'NuGet.config')){
         Set-Content -Path 'NuGet.config' `
-            -Value '<?xml version="1.0" encoding="utf-8"?><configuration><packageSources /></configuration>' `
+            -Value '<?xml version="1.0" encoding="utf-8"?>
+            <configuration>
+                <packageSources>
+                    <clear />
+                    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+                </packageSources>
+            </configuration>' `
             -Encoding 'utf8'
     }
     
@@ -51,4 +90,68 @@ function Add-NuGetPackageSource {
     $el.SetAttribute("value", $Path)
     $sourcesEl.AppendChild($el)
     $doc.Save("$configFilePath")
+}
+
+function Download-AzCopy {
+    # Downloading AzCopy from MS website and extract it locally.  Doing it this way so don't have to
+    # worry about installing software on build servers or developer workstations.  Using AzCopy
+    # instead of Blob APIs because it is more effecient when working with large files
+    $lastCheckedAt = [System.DateTime]::MinValue
+
+    $azCopyInfoPath = Combine-Paths -Paths $localCachePath, "AzCopy-info.txt"
+    if (Test-Path -Path $azCopyInfoPath) {
+        Write-Host "reading last time AzCopy was checked for new version"
+        $lastCheckedAt = [System.DateTime]::Parse((Get-Content -Path $azCopyInfoPath))
+    }
+
+    if ($lastCheckedAt.AddDays(7) -gt [System.DateTime]::Now){
+        Write-Host "AzCopy was last checked at $lastCheckedAt - that falls within the last week - not downloading again"
+    }
+    else {
+        if ($IsLinux){
+            Write-Host "downloading AzCopy v10 for Linux into local cache"
+            Invoke-WebRequest -Uri "https://aka.ms/downloadazcopy-v10-linux" `
+                -OutFile "$localCachePath/AzCopy-10.0.tar" `
+                -UseBasicParsing
+        }
+        else {
+            Write-Host "downloading AzCopy v10 for Windows into local cache"
+            Invoke-WebRequest -Uri "https://aka.ms/downloadazcopy-v10-windows" `
+                -OutFile (Combine-Paths -Paths $localCachePath, 'AzCopy-10.0.zip') `
+                -UseBasicParsing
+        }
+
+        Write-Host "updating AzCopy-info.txt"
+        Set-Content -Path $azCopyInfoPath -Value (Get-Date)
+    }
+
+    # tar needs to have the directory present to extract it to a specific dir
+    $azCopyDirPath = Combine-Paths -Paths '.external-bin', 'AzCopy'
+    if (!(Test-Path -Path $azCopyDirPath)){
+        Write-Host "creating $azCopyDirPath to extract downloaded AzCopy into"
+        New-Item -Path $azCopyDirPath -ItemType Directory | Out-Null
+    }
+
+    if ($IsLinux){
+        Write-Host "extracting downloaded AzCopy v10 tar from local cache into .external-bin"
+        # tar will write out the files it extracts and it will be interpreted as Write-Ouptut
+        # and mess up the path to $azCopyExe that is returned
+        tar -C ./.external-bin/AzCopy/ -xvf $localCachePath/AzCopy-10.0.tar | Out-Null
+        
+        $azcopySearchPath = "./.external-bin/AzCopy/azcopy_linux*/azcopy"
+    }
+    else {
+        Write-Host "extracting downloaded AzCopy v10 zip from local cache into .external-bin"
+        Expand-Archive -Path (Combine-Paths -Paths $localCachePath, 'AzCopy-10.0.zip') `
+                -DestinationPath $azCopyDirPath `
+                -Force
+        
+        $azcopySearchPath = Combine-Paths -Paths '.external-bin', 'AzCopy', 'azcopy_windows*', 'azcopy.exe'
+    }
+
+    $azcopyExe = (Get-ChildItem -Path "$azcopySearchPath" | 
+        Sort-Object -Property LastWriteTime |
+        Select-Object -Last 1).FullName
+
+    Write-Output $azcopyExe
 }
