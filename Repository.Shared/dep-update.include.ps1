@@ -21,6 +21,11 @@ if ($null -eq (Get-PSRepository |Where-Object {$_.Name -eq 'PSGallery' -and $_.I
     Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
 }
 
+# make sure local .external-bin exists
+if (!(Test-Path -Path '.external-bin')) { 
+    New-Item -Path '.external-bin' -ItemType directory 
+}
+
 function Add-NuGetPackageSource {
     param(
         [string]$Name,
