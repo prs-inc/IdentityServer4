@@ -21,6 +21,34 @@ if ($null -eq (Get-PSRepository |Where-Object {$_.Name -eq 'PSGallery' -and $_.I
     Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
 }
 
+# this local directory will be used if present to save traffic to/from Azure because
+# that is much slower than pulling from a local file
+if ($null -ne $env:SOFTWARE_LIBRARY){
+    $localCachePath = $env:SOFTWARE_LIBRARY
+    Write-Host "SOFTWARE_LIBRARY in env variable is $localCachePath"
+}
+else {
+    $localCachePath = Join-Path ((Get-Location).Drive.Root) ".software-library"
+    Write-Host "no env variable for SOFTWARE_LIBRARY - using path on local drive $localCachePath"
+}
+
+if (!(Test-Path -Path $localCachePath)) {
+    Write-Host "did not find $localCachePath on current disk - so using directory in user profile"
+    $folderPath = [System.Environment+SpecialFolder]::UserProfile
+    $userprofile = [System.Environment]::GetFolderPath($folderPath)
+    $localCachePath = Join-Path $userprofile ".software-library"
+
+    if (!(Test-Path -Path $localCachePath)){
+        Write-Host "creating $localCachePath on current disk to cache software-library downloads"
+        New-Item -Path $localCachePath -ItemType Directory
+    }
+}
+
+
+# This will be set if we are pulling down from Azure because we will get the current AzCopy.exe
+# by downloading from MS and then extracting.  The path with vary depending on the version downloaded.
+$azcopyPath = ''
+
 # make sure local .external-bin exists
 if (!(Test-Path -Path '.external-bin')) { 
     New-Item -Path '.external-bin' -ItemType directory 
