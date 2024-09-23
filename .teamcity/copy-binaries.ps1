@@ -34,6 +34,8 @@ $buildPath = [System.IO.Path]::Combine($CheckoutPath, '.build')
 # This is the location the csproj files are configured to output the NuGet packages to.
 $packagesPath = [System.IO.Path]::Combine($buildPath, 'packages')
 
+$azCopyExe = (Find-AzCopy)
+
 # Read the version.xml to figure out what the name of the Release is.  Not using the branch name because story/bug
 # branches will be created that are not version numbers.  But this should not really matter because right now this
 # script is only called for RC builds and those should only be done on branches with a valid release version.
@@ -61,7 +63,7 @@ Compress-Archive `
 # copy IdentityServer4 packages to software library on Azure.  Don't want to use the Copy-BinariesToSoftwareLibrary
 # because of the logic it contains for RC builds.  We always want the packages to 
 Copy-BinariesToAzureSoftwareLibrary `
-    -SourceFile $zipPath `
-    -BuildType $BuildType
+    -AzCopyExe $azCopyExe `
+    -SourceFile $zipPath
 
 # not adding the IdentityServer4 binaries to symbol store because the dll/pdb is contained in the NuGet Package
