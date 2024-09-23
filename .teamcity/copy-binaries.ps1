@@ -25,6 +25,7 @@ param (
 
 # dotsource common functions
 . .\.include.ps1
+. .\copy-binaries.include.ps1
 
 # The .build directory at the root of the working directory is the location where build output that should
 # be considered the build artifacts is at.
