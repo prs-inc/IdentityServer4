@@ -98,7 +98,7 @@ function Publish-DotNet {
         [String]$Project,
         [String]$VsConfiguration,
         [String]$Destination,
-        [string]$TFM = 'netcoreapp3.1',
+        [string]$TFM = 'net8.0',
         [string]$RID = ''
     )
 
@@ -366,15 +366,9 @@ function Zip-Directory {
         [string]$Destination
     )
 
-    $exe = "C:\Program Files\7-Zip\7z.exe"
-    
-    if ($IsLinux){
-        $exe = "7z"
-    }
-    
-    exec {
-        & $exe a $Destination (Join-Path -Path $Path -ChildPath '*')
-    }
+    Write-Host "zipping the $Path into the file $Destination"
+    Compress-Archive -Path (Combine-Paths -Paths $Path '*') `
+        -DestinationPath $Destination
 }
 
 
