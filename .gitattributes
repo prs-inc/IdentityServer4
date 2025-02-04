@@ -1,3 +1,6 @@
+# Set the default behavior, in case people don't have core.autocrlf set.
+* text=auto
+
 version.xml merge=ours
 Directory.Build.props merge=ours
 merge-branch.txt merge=ours
