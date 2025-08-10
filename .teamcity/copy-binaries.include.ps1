@@ -2,33 +2,44 @@
 # key is sensitive because it allows for full permission to the file container 
 $softwareLibraryWriteToken = $env:azure_software_library_write_token
 
-# location of the software-library directory on either Azure Blob Container or local cache on Server
-$softwareLibraryUrl = 'https://casemaxdata01.blob.core.windows.net/software-library'
+# This is the name of the storage account in the Azure Portal
+$storageAcctName = 'casemaxdata01'
+$containerName = 'software-library'
 
-# this local directory will be used if present to save traffic to/from Azure because
-# that is much slower than pulling from a local file
-if ($null -ne $env:SOFTWARE_LIBRARY){
-    $softwareLibraryPath = $env:SOFTWARE_LIBRARY
-    Write-Host "SOFTWARE_LIBRARY in env variable is $softwareLibraryPath"
+Write-Host "checking to see if Az.Accounts module is installed"
+if (!(Get-Module -Name 'Az.Accounts' -ListAvailable | Where-Object {$_.Version -eq '2.10.2'})) {
+    Write-Host 'installing Az.Accounts 2.10.2 module'
+    Install-Module -Name 'Az.Accounts' -RequiredVersion '2.10.2' -Scope CurrentUser -Confirm:$false -Force
 }
-else {
-    $softwareLibraryPath = Join-Path ((Get-Location).Drive.Root) ".software-library"
-    Write-Host "no env variable for SOFTWARE_LIBRARY - using path on local drive $softwareLibraryPath"
+
+Write-Host "checking to see if Az.Storage module is installed"
+if (!(Get-Module -Name 'Az.Storage' -ListAvailable | Where-Object {$_.Version -eq '4.10.0'})) {
+    Write-Host 'installing Az.Storage 4.10.0 module'
+    Install-Module -Name 'Az.Storage' -RequiredVersion '4.10.0' -Scope CurrentUser -Confirm:$false -Force
 }
+
+Import-Module Az.Accounts -RequiredVersion '2.10.2'
+Import-Module Az.Storage -RequiredVersion '4.10.0'
+
+Write-Host "initializing connection to Azure Storage Account $storageAcctName"
+
+#This will create a context to the Url 'https://casemaxdata01.blob.core.windows.net'
+# [Microsoft.WindowsAzure.Commands.Storage.AzureStorageContext]
+$storageCtx = New-AzStorageContext -SasToken $softwareLibraryWriteToken -StorageAccountName $storageAcctName
 
 function Copy-BinariesToAzureSoftwareLibrary {
     param (
-        [string]$AzCopyExe,
         [string]$SourceFile
     )
 
     $path = (Resolve-Path -Path $SourceFile)
     $filename = [System.IO.Path]::GetFileName($path)
-    $destUrl = "$softwareLibraryUrl/$filename$softwareLibraryWriteToken"
 
-    Write-Host "upload $SourceFile as $filename to container $softwareLibraryUrl"
-    & "$AzCopyExe" cp `
-        "$path" `
-        "$destUrl"
+    Write-Host "upload $SourceFile to container $($storageCtx.BlobEndPoint)"
+
+    Send-AzStorageBlobContent -File "$path" `
+        -Blob $filename `
+        -Container $containerName `
+        -Context $storageCtx
 
 }
