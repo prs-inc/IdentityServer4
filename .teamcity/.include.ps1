@@ -2,54 +2,30 @@
 # key is sensitive because it allows for full permission to the file container 
 $softwareLibraryWriteToken = $env:azure_software_library_write_token
 
-# location of the software-library directory on either Azure Blob Container or local cache on Server
-$softwareLibraryUrl = 'https://casemaxdata01.blob.core.windows.net/software-library'
+# This is the name of the storage account in the Azure Portal
+$storageAcctName = 'casemaxdata01'
+$containerName = 'software-library'
 
-# this local directory will be used if present to save traffic to/from Azure because
-# that is much slower than pulling from a local file
-if ($null -ne $env:SOFTWARE_LIBRARY){
-    $softwareLibraryPath = $env:SOFTWARE_LIBRARY
-    Write-Host "SOFTWARE_LIBRARY in env variable is $softwareLibraryPath"
-}
-else {
-    $softwareLibraryPath = Join-Path ((Get-Location).Drive.Root) ".software-library"
-    Write-Host "no env variable for SOFTWARE_LIBRARY - using path on local drive $softwareLibraryPath"
+Write-Host "checking to see if Az.Accounts module is installed"
+if (!(Get-Module -Name 'Az.Accounts' -ListAvailable | Where-Object {$_.Version -eq '2.10.2'})) {
+    Write-Host 'installing Az.Accounts 2.10.2 module'
+    Install-Module -Name 'Az.Accounts' -RequiredVersion '2.10.2' -Scope CurrentUser -Confirm:$false -Force
 }
 
-function Find-AzCopy {
-    
-    # the AzCopy executable should have already been downloaded into the .external-bin directory
-    $azCopyExtBinPath = [System.IO.Path]::Combine($PSScriptRoot, '..', '.external-bin', 'AzCopy')
-
-    if ($IsLinux){
-        $azcopySearchPath = [System.IO.Path]::Combine($azCopyExtBinPath, 'azcopy_linux*', 'azcopy')
-    }
-    else {
-        $azcopySearchPath = [System.IO.Path]::Combine($azCopyExtBinPath,'azcopy_windows*', 'azcopy.exe')
-    }
-
-    # search for the exe and get the one with the most recent LastWriteTime - should only be one because
-    # the .external-bin should be cleaned before and after each build
-    $azcopyExe = (Get-ChildItem -Path "$azcopySearchPath" | 
-        Sort-Object -Property LastWriteTime |
-        Select-Object -Last 1).FullName
-
-    Write-Host "use AzCopy.exe at $azcopyExe"
-    Write-Output $azcopyExe
+Write-Host "checking to see if Az.Storage module is installed"
+if (!(Get-Module -Name 'Az.Storage' -ListAvailable | Where-Object {$_.Version -eq '4.10.0'})) {
+    Write-Host 'installing Az.Storage 4.10.0 module'
+    Install-Module -Name 'Az.Storage' -RequiredVersion '4.10.0' -Scope CurrentUser -Confirm:$false -Force
 }
 
+Import-Module Az.Accounts -RequiredVersion '2.10.2'
+Import-Module Az.Storage -RequiredVersion '4.10.0'
 
-function Copy-BinariesToLocalCacheSoftwareLibrary {
-    param (
-        [string]$SourceFile
-    )
+Write-Host "initializing connection to Azure Storage Account $storageAcctName"
 
-    $filename = [System.IO.Path]::GetFileName($SourceFile)
-
-    $destPath = "$softwareLibraryPath\$filename"
-    Write-Information "copying from $SourceFile to $destPath for $branch.$revision"
-    Copy-Item -Path $SourceFile -Destination $destPath -Force
-}
+#This will create a context to the Url 'https://casemaxdata01.blob.core.windows.net'
+# [Microsoft.WindowsAzure.Commands.Storage.AzureStorageContext]
+$storageCtx = New-AzStorageContext -SasToken $softwareLibraryWriteToken -StorageAccountName $storageAcctName
 
 function Copy-BinariesToAzureSoftwareLibrary {
     param (
@@ -58,35 +34,12 @@ function Copy-BinariesToAzureSoftwareLibrary {
 
     $path = (Resolve-Path -Path $SourceFile)
     $filename = [System.IO.Path]::GetFileName($path)
-    $destUrl = "$softwareLibraryUrl/$filename$softwareLibraryWriteToken"
 
-    $azCopyExe = (Find-AzCopy)
+    Write-Host "upload $SourceFile to container $($storageCtx.BlobEndPoint)"
 
-    Write-Host "upload $SourceFile as $filename to container $softwareLibraryUrl"
-    & "$azCopyExe" cp `
-        "$path" `
-        "$destUrl"
+    Send-AzStorageBlobContent -File "$path" `
+        -Blob $filename `
+        -Container $containerName `
+        -Context $storageCtx
 
-}
-
-function Copy-BinariesToSoftwareLibrary {
-    param (
-        [string]$SourceFile,
-        [string]$BuildType
-    )
-
-    # Only the build servers will ever need the 'rc' builds so we can save the time of uploading
-    # to and downloading from Azure.  The rc builds for each Firm are run on the same server as 
-    # the CaseMax rc build so we don't need the rc builds out on Azure, just in the local cache.
-    # The other build types will end up having copies made to the
-    # local cache by dep-update.include.ps1.  It has logic to sync the local share copy with the copy
-    # in Azure if it finds that Azure copy is newer than local cache copy.
-    if ($BuildType -eq 'rc'){
-        Write-Information 'copying the rc build out to the local cache software-library directory'
-        Copy-BinariesToLocalCacheSoftwareLibrary -SourceFile $SourceFile
-    }
-    else {
-        Write-Information "copying the $BuildType build out to Azure software-library"
-        Copy-BinariesToAzureSoftwareLibrary -SourceFile $SourceFile
-    }
 }
