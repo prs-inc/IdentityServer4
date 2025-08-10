@@ -24,7 +24,6 @@ param (
 )
 
 # dotsource common functions
-. .\.include.ps1
 . .\copy-binaries.include.ps1
 
 # The .build directory at the root of the working directory is the location where build output that should
@@ -33,8 +32,6 @@ $buildPath = [System.IO.Path]::Combine($CheckoutPath, '.build')
 
 # This is the location the csproj files are configured to output the NuGet packages to.
 $packagesPath = [System.IO.Path]::Combine($buildPath, 'packages')
-
-$azCopyExe = (Find-AzCopy)
 
 # Read the version.xml to figure out what the name of the Release is.  Not using the branch name because story/bug
 # branches will be created that are not version numbers.  But this should not really matter because right now this
@@ -63,7 +60,6 @@ Compress-Archive `
 # copy IdentityServer4 packages to software library on Azure.  Don't want to use the Copy-BinariesToSoftwareLibrary
 # because of the logic it contains for RC builds.  We always want the packages to 
 Copy-BinariesToAzureSoftwareLibrary `
-    -AzCopyExe $azCopyExe `
     -SourceFile $zipPath
 
 # not adding the IdentityServer4 binaries to symbol store because the dll/pdb is contained in the NuGet Package
