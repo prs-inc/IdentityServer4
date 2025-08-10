@@ -37,7 +37,7 @@ function Copy-BinariesToAzureSoftwareLibrary {
 
     Write-Host "upload $SourceFile to container $($storageCtx.BlobEndPoint)"
 
-    Send-AzStorageBlobContent -File "$path" `
+    Set-AzStorageBlobContent -File "$path" `
         -Blob $filename `
         -Container $containerName `
         -Context $storageCtx
