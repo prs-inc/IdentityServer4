@@ -2,16 +2,16 @@
 <Project>
   <!-- AssemblyCommonInfo.cs -->
   <PropertyGroup>
-    <AssemblyVersion>8.0.8</AssemblyVersion>
+    <AssemblyVersion>8.0.9</AssemblyVersion>
     <Company>CaseMaxSolutions</Company>
     <Copyright>Copyright 1999-2025 © CaseMaxSolutions</Copyright>
-    <FileVersion>8.0.8.5279</FileVersion>
-    <InformationalVersion>8.0.8</InformationalVersion>
+    <FileVersion>8.0.9.2431</FileVersion>
+    <InformationalVersion>8.0.9</InformationalVersion>
     <Product>IdentityServer4 8.0.0</Product>
-    <PackageVersion>8.0.8</PackageVersion>
+    <PackageVersion>8.0.9</PackageVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- used in PackageReference[@Version] for Solutions in this repository that put nupkg files in the ./.build/packages directory -->
-    <SolutionVersion>8.0.8</SolutionVersion>
+    <SolutionVersion>8.0.9</SolutionVersion>
   </PropertyGroup>
 </Project>
