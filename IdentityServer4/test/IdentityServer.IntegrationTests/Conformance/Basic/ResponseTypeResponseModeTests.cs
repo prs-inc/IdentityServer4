@@ -82,7 +82,7 @@ namespace IdentityServer.IntegrationTests.Conformance.Basic
             var response = await _mockPipeline.BrowserClient.GetAsync(url);
             response.StatusCode.Should().Be(HttpStatusCode.Found);
 
-            var authorization = new IdentityModel.Client.AuthorizeResponse(response.Headers.Location.ToString());
+            var authorization = new Duende.IdentityModel.Client.AuthorizeResponse(response.Headers.Location.ToString());
             authorization.IsError.Should().BeFalse();
             authorization.Code.Should().NotBeNull();
             authorization.State.Should().Be(state);
@@ -100,13 +100,16 @@ namespace IdentityServer.IntegrationTests.Conformance.Basic
             var state = Guid.NewGuid().ToString();
             var nonce = Guid.NewGuid().ToString();
 
-            var url = _mockPipeline.CreateAuthorizeUrl(
+            var authorizeUrl = _mockPipeline.CreateAuthorizeUrl(
                 clientId: "code_client",
-                responseType: null, // missing
+                responseType: "missing", // missing needs to be removed later
                 scope: "openid",
                 redirectUri: "https://code_client/callback",
                 state: state,
                 nonce: nonce);
+
+            var url = authorizeUrl
+                .Replace("&response_type=missing", string.Empty);
 
             _mockPipeline.BrowserClient.AllowAutoRedirect = true;
             var response = await _mockPipeline.BrowserClient.GetAsync(url);

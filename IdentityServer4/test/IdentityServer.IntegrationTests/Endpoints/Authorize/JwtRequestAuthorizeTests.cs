@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 using FluentAssertions;
 
-using IdentityModel;
+using Duende.IdentityModel;
 
 using IdentityServer.IntegrationTests.Common;
 using IdentityServer4;

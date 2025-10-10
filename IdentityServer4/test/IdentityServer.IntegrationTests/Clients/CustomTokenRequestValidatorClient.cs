@@ -7,7 +7,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using FluentAssertions;
-using IdentityModel.Client;
+using Duende.IdentityModel.Client;
 using IdentityServer.IntegrationTests.Clients.Setup;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
@@ -120,7 +120,7 @@ namespace IdentityServer.IntegrationTests.Clients
 
         private Dictionary<string, JsonElement> GetFields(TokenResponse response)
         {
-            return response.Json.ToObject<Dictionary<string, JsonElement>>();
+            return response.Json?.ToObject<Dictionary<string, JsonElement>>();
         }
     }
 }

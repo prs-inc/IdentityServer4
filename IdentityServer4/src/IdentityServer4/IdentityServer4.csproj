@@ -40,7 +40,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="IdentityModel" />
+    <PackageReference Include="Duende.IdentityModel" />
 
     <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" />
 
