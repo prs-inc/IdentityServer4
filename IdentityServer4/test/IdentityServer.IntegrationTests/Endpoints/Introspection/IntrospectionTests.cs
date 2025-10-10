@@ -10,7 +10,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using FluentAssertions;
-using IdentityModel.Client;
+using Duende.IdentityModel.Client;
 using IdentityServer.IntegrationTests.Endpoints.Introspection.Setup;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
@@ -179,7 +179,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Introspection
                 Token = tokenResponse.AccessToken
             });
 
-            var values = introspectionResponse.Json.ToObject<Dictionary<string, JsonElement>>();
+            var values = introspectionResponse.Json?.ToObject<Dictionary<string, JsonElement>>();
 
             values["aud"].ValueKind.Should().Be(JsonValueKind.String);
             values["iss"].ValueKind.Should().Be(JsonValueKind.String);
@@ -218,7 +218,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Introspection
                 Token = tokenResponse.AccessToken
             });
 
-            var values = introspectionResponse.Json.ToObject<Dictionary<string, JsonElement>>();
+            var values = introspectionResponse.Json?.ToObject<Dictionary<string, JsonElement>>();
 
             values["aud"].ValueKind.Should().Be(JsonValueKind.String);
             values["iss"].ValueKind.Should().Be(JsonValueKind.String);
@@ -257,7 +257,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Introspection
                 Token = tokenResponse.AccessToken
             });
 
-            var values = introspectionResponse.Json.ToObject<Dictionary<string, JsonElement>>();
+            var values = introspectionResponse.Json?.ToObject<Dictionary<string, JsonElement>>();
 
             values["aud"].ValueKind.Should().Be(JsonValueKind.Array);
 
@@ -302,7 +302,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Introspection
                 Token = tokenResponse.AccessToken
             });
 
-            var values = introspectionResponse.Json.ToObject<Dictionary<string, JsonElement>>();
+            var values = introspectionResponse.Json?.ToObject<Dictionary<string, JsonElement>>();
 
             values["aud"].ValueKind.Should().Be(JsonValueKind.String);
             values["iss"].ValueKind.Should().Be(JsonValueKind.String); 
