@@ -453,7 +453,7 @@ function Clean-DotNet {
     Remove-CompilerFiles
 
     exec {
-        dotnet clean "$Solution.sln" `
+        dotnet clean "$Solution.slnx" `
             --configuration $VsConfiguration 
     }
 }
@@ -472,7 +472,7 @@ function Build-DotNet {
     # GenerateDocumenationFile and skip the conditional <PropertyGroup> in the csproj file.
 
     exec {
-        dotnet build "$Solution.sln" `
+        dotnet build "$Solution.slnx" `
             --configuration $VsConfiguration `
             -p:Platform="$Platform" `
             -p:CreateDocumentationFile="true" `

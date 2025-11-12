@@ -1,0 +1,44 @@
+<Solution>
+  <Folder Name="/build-root/">
+    <File Path="../build.ps1" />
+    <File Path="../dependencies-update.ps1" />
+    <File Path="../Directory.Build.props" />
+    <File Path="../global.json" />
+    <File Path="../NuGet.config" />
+    <File Path="../version.xml" />
+    <File Path="Directory.Build.targets" />
+  </Folder>
+  <Folder Name="/build-shared/">
+    <File Path="../Repository.Shared/dep-update.include.ps1" />
+    <File Path="../Repository.Shared/filesystem.include.ps1" />
+    <File Path="../Repository.Shared/root.build.ps1" />
+    <File Path="../Repository.Shared/sln.include.ps1" />
+  </Folder>
+  <Folder Name="/build-sln/">
+    <File Path="Directory.Build.targets" />
+    <File Path="IdentityServer4.build.ps1" />
+  </Folder>
+  <Folder Name="/hosts/">
+    <Project Path="host/Host.AspNetIdentity/Host.AspNetIdentity.csproj" />
+    <Project Path="host/Host.EntityFramework/Host.EntityFramework.csproj" />
+    <Project Path="host/Host/Host.csproj" />
+  </Folder>
+  <Folder Name="/migrations/">
+    <Project Path="migrations/AspNetIdentityDb/AspNetIdentityDb.csproj" />
+    <Project Path="migrations/EntityFrameworkDb/EntityFrameworkDb.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/IdentityServer4.AspNetIdentity/IdentityServer4.AspNetIdentity.csproj" />
+    <Project Path="src/IdentityServer4.EntityFramework.Storage/IdentityServer4.EntityFramework.Storage.csproj" />
+    <Project Path="src/IdentityServer4.EntityFramework/IdentityServer4.EntityFramework.csproj" />
+    <Project Path="src/IdentityServer4.Storage/IdentityServer4.Storage.csproj" />
+    <Project Path="src/IdentityServer4/IdentityServer4.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/IdentityServer.IntegrationTests/IdentityServer.IntegrationTests.csproj" />
+    <Project Path="test/IdentityServer.UnitTests/IdentityServer.UnitTests.csproj" />
+    <Project Path="test/IdentityServer4.EntityFramework.IntegrationTests/IdentityServer4.EntityFramework.IntegrationTests.csproj" />
+    <Project Path="test/IdentityServer4.EntityFramework.Tests/IdentityServer4.EntityFramework.Tests.csproj" />
+    <Project Path="test/IdentityServer4.EntityFramework.UnitTests/IdentityServer4.EntityFramework.UnitTests.csproj" />
+  </Folder>
+</Solution>

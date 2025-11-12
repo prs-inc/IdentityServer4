@@ -60,7 +60,7 @@ namespace IdentityServer.UnitTests.ResponseHandling
         }
 
         [Fact]
-        public async void ProcessAsync_when_valiationresult_client_null_exect_exception()
+        public async Task ProcessAsync_when_valiationresult_client_null_exect_exception()
         {
             var validationResult = new DeviceAuthorizationRequestValidationResult(new ValidatedDeviceAuthorizationRequest());
             Func <Task> act = () => generator.ProcessAsync(validationResult, TestBaseUrl);
@@ -68,7 +68,7 @@ namespace IdentityServer.UnitTests.ResponseHandling
         }
 
         [Fact]
-        public async void ProcessAsync_when_baseurl_null_exect_exception()
+        public async Task ProcessAsync_when_baseurl_null_exect_exception()
         {
             Func<Task> act = () => generator.ProcessAsync(testResult, null);
             await act.Should().ThrowAsync<ArgumentException>();
