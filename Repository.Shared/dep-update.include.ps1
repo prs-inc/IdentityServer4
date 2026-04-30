@@ -1,9 +1,9 @@
-﻿# THIS FILE IS NOT MEANT TO BE USED DIRECTLY 
+﻿# THIS FILE IS NOT MEANT TO BE USED DIRECTLY
 # it should be included in dependencies-update.ps1 at the root
 . ([System.IO.Path]::Combine($PSScriptRoot, 'utils.include.ps1'))
 
 # need to make sure PowerShell is using latest security protocol on older OS versions
-# to make http requests. The old SSL3 will fail on most https based connections - such 
+# to make http requests. The old SSL3 will fail on most https based connections - such
 # as the one to https://aka.ms
 [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
 
