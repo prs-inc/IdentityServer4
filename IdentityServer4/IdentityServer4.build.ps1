@@ -23,7 +23,8 @@ Add-BuildTask -Name Clean -Jobs {
 Add-BuildTask -Name Build -Jobs {
     Build-DotNet -Solution $slnName -VsConfiguration $vsConfiguration
 
-    Set-NuGetContentsDigitalSignature -Path '..\.build\packages' -Prefix $slnName
+    # dotnet sign requires net8.0 - this version is still under net6.0
+    # Set-NuGetContentsDigitalSignature -Path '..\.build\packages' -Prefix $slnName
 }
 
 Add-BuildTask -Name Setup -Jobs {
