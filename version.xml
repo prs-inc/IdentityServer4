@@ -10,6 +10,6 @@
          the FileInfo.Revision value for the version of the file in the MSI database.
   -->
   <product version="8.0.0" knownas="IdentityServer4" />
-  <source branch="8.0.0" revision="1d51a17f104eeb7c7457243155d62403301b7881" />
-  <file revision="10" date="2025-09-11T09:28:31.7787129-05:00" />
+  <source branch="8.0.0" revision="a769f85ddacc1d7fc62912c14f5de071d01ee2ea" />
+  <file revision="11" date="2026-04-30T12:45:53.3503618-05:00" />
 </version>
