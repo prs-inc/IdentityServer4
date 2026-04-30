@@ -22,6 +22,8 @@ Add-BuildTask -Name Clean -Jobs {
 
 Add-BuildTask -Name Build -Jobs {
     Build-DotNet -Solution $slnName -VsConfiguration $vsConfiguration
+
+    Set-NuGetContentsDigitalSignature -Path '..\.build\packages' -Prefix $slnName
 }
 
 Add-BuildTask -Name Setup -Jobs {

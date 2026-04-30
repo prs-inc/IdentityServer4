@@ -1,13 +1,13 @@
-# THIS FILE IS NOT MEANT TO BE USED DIRECTLY 
+# THIS FILE IS NOT MEANT TO BE USED DIRECTLY
 # It should be included in any build for VS solutions.
 
 Write-Host "the current location is " (Get-Location)
 $rootPath = (Resolve-Path -Path '..')
 
 # include shared functions for file system
-# since this is a nested dot source it has to be done from the location of the 
+# since this is a nested dot source it has to be done from the location of the
 # current root file
-. ([System.IO.Path]::Combine($rootPath, 'Repository.Shared', 'filesystem.include.ps1'))
+. ([System.IO.Path]::Combine($rootPath, 'Repository.Shared', 'utils.include.ps1'))
 
 function Remove-CompilerFiles {
     # MSBuild Clean leaves behind files that it did not create
