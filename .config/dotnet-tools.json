@@ -13,6 +13,13 @@
       "commands": [
         "dotnet-ef"
       ]
+    },
+    "sign": {
+      "version": "0.9.1-beta.26179.1",
+      "commands": [
+        "sign"
+      ],
+      "rollForward": false
     }
   }
 }

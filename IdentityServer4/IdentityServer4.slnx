@@ -3,6 +3,7 @@
     <File Path="../build.ps1" />
     <File Path="../dependencies-update.ps1" />
     <File Path="../Directory.Build.props" />
+    <File Path="../.config/dotnet-tools.json" />
     <File Path="../global.json" />
     <File Path="../NuGet.config" />
     <File Path="../version.xml" />
