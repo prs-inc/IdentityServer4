@@ -273,7 +273,9 @@ function Set-NuGetContentsDigitalSignature {
             # Then AzureSignTool modifies the dll/exe when it adds the Digital Signature to it - changing the Modified
             # Time back to local.  For consistency with other files in the nupkg we need to change that time back
             # to UTC before putting the dll/exe file back into the nupkg file
-            Set-DigitalSignature -Endpoint $Endpoint -Account $Account -CertProfile $CertProfile -Path $contentPath -UseUTCForLastWriteTime
+            Set-DigitalSignature -Path $contentPath -Include @('*.dll', '*.exe') `
+                -Endpoint $Endpoint -Account $Account -CertProfile $CertProfile `
+                -UseUTCForLastWriteTime
 
             # recreate the zip file with the signed content and change extension to to nupkg
             Compress-NuGetPackage -Path $contentPath -DestinationPath $_
