@@ -60,7 +60,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build-shared", "build-shared", "{37C91239-0E66-47CE-9D82-2758A0F161E8}"
 	ProjectSection(SolutionItems) = preProject
 		..\Repository.Shared\dep-update.include.ps1 = ..\Repository.Shared\dep-update.include.ps1
-		..\Repository.Shared\filesystem.include.ps1 = ..\Repository.Shared\filesystem.include.ps1
+		..\Repository.Shared\utils.include.ps1 = ..\Repository.Shared\utils.include.ps1
 		..\Repository.Shared\root.build.ps1 = ..\Repository.Shared\root.build.ps1
 		..\Repository.Shared\sln.include.ps1 = ..\Repository.Shared\sln.include.ps1
 	EndProjectSection

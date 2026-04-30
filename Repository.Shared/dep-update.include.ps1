@@ -1,6 +1,6 @@
 ﻿# THIS FILE IS NOT MEANT TO BE USED DIRECTLY 
 # it should be included in dependencies-update.ps1 at the root
-. ([System.IO.Path]::Combine($PSScriptRoot, 'filesystem.include.ps1'))
+. ([System.IO.Path]::Combine($PSScriptRoot, 'utils.include.ps1'))
 
 # need to make sure PowerShell is using latest security protocol on older OS versions
 # to make http requests. The old SSL3 will fail on most https based connections - such 
