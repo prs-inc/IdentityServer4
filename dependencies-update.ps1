@@ -13,6 +13,4 @@ Add-NuGetPackageSource `
     -Name "Solution Packages" `
     -Path (Join-Path -Path ".build" -ChildPath "packages")
 
-if (Test-Path -Path 'dotnet-tools.json') {
-    dotnet tool restore
-}
+dotnet tool restore
