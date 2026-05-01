@@ -258,30 +258,20 @@ function Set-NuGetContentsDigitalSignature {
     # .nupkg.  Clean up the resources and make a note of having signed the .nupkg file.
     $nupkgFiles |
         ForEach-Object {
+
             $packageName = [System.IO.Path]::GetFileNameWithoutExtension($_)
-            $contentPath = (Combine-Paths -Paths $p, $packageName)
-
-            # need to create the directory to
-            Write-Output "expanding the .nupkg into the directory $contentPath"
-
-            Expand-NuGetPackage -Path $_ -DestinationPath $contentPath
-            Remove-Item -Path $_
-
-            Write-Host "going to sign contents of file $_"
-
-            # When NuGet puts the dll/exe into a nupkg file it changes the File's Modified Time to UTC instead of local.
-            # Then AzureSignTool modifies the dll/exe when it adds the Digital Signature to it - changing the Modified
-            # Time back to local.  For consistency with other files in the nupkg we need to change that time back
-            # to UTC before putting the dll/exe file back into the nupkg file
-            Set-DigitalSignature -Path $contentPath -Include @('*.dll', '*.exe') `
-                -Endpoint $Endpoint -Account $Account -CertProfile $CertProfile `
-                -UseUTCForLastWriteTime
-
-            # recreate the zip file with the signed content and change extension to to nupkg
-            Compress-NuGetPackage -Path $contentPath -DestinationPath $_
-
-            Remove-Directory -Path $contentPath
-
+            Write-Host "going to sign contents of nupkg $packageName"
+            
+            dotnet sign code artifact-signing `
+                --artifact-signing-endpoint $Endpoint `
+                --artifact-signing-account $Account `
+                --artifact-signing-certificate-profile $CertProfile `
+                --azure-credential-type 'managed-identity' `
+                --timestamp-url 'http://timestamp.digicert.com' `
+                --verbosity 'Information' `
+                --recurse-containers `
+                $_
+            
             Add-Content -Path "$p\_signed.txt" -Value $packageName
         }
 }
