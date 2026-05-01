@@ -253,10 +253,6 @@ function Set-NuGetContentsDigitalSignature {
         Where-Object {$signedFiles -notcontains [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)} |
         Select-Object -ExpandProperty 'FullName')
 
-    $tempFile = [System.IO.Path]::GetTempFileName()
-    
-    $nupkgFiles | Add-Content -Path $tempFile
-    
     # iterate through each file - rename the .nupkg files into .zip and extract their contents.  Then sign
     # the contents that were extracted.  Then zip that directory back up and change the extension back to
     # .nupkg.  Clean up the resources and make a note of having signed the .nupkg file.
@@ -270,15 +266,13 @@ function Set-NuGetContentsDigitalSignature {
         --timestamp-url 'http://timestamp.digicert.com' `
         --verbosity 'Information' `
         --recurse-containers `
-        --file-list $tempFile
+        ($nupkgFiles -Join " ")
 
     $nupkgFiles | 
         ForEach-Object {
             $packageName = [System.IO.Path]::GetFileNameWithoutExtension($_)
             Add-Content -Path "$p\_signed.txt" -Value $packageName
         }
-    
-    Remove-Item -Path $tempFile
 }
 
 function Zip-Directory {
