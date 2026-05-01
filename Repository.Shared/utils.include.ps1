@@ -251,28 +251,30 @@ function Set-NuGetContentsDigitalSignature {
     # get the nupkg files in this directory that have not had their contents signed before
     $nupkgFiles = @(Get-ChildItem -Path "$p\$Prefix.*.nupkg" |
         Where-Object {$signedFiles -notcontains [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)} |
-        Select-Object -ExpandProperty 'Name')
+        Select-Object -ExpandProperty 'FullName')
 
     # iterate through each file - rename the .nupkg files into .zip and extract their contents.  Then sign
     # the contents that were extracted.  Then zip that directory back up and change the extension back to
     # .nupkg.  Clean up the resources and make a note of having signed the .nupkg file.
     Write-Host "going to sign contents of nupkg files"
     
-    dotnet sign code artifact-signing `
-        --artifact-signing-endpoint $Endpoint `
-        --artifact-signing-account $Account `
-        --artifact-signing-certificate-profile $CertProfile `
-        --azure-credential-type 'managed-identity' `
-        --timestamp-url 'http://timestamp.digicert.com' `
-        --verbosity 'Trace' `
-        --base-directory $p `
-        --recurse-containers `
-        ($nupkgFiles -Join " ")
-
-    $nupkgFiles | 
+    $nupkgFiles |
         ForEach-Object {
             $packageName = [System.IO.Path]::GetFileNameWithoutExtension($_)
+            Write-Host "going to sign contents of $packageName"
+            
+            dotnet sign code artifact-signing `
+                --artifact-signing-endpoint $Endpoint `
+                --artifact-signing-account $Account `
+                --artifact-signing-certificate-profile $CertProfile `
+                --azure-credential-type 'managed-identity' `
+                --timestamp-url 'http://timestamp.digicert.com' `
+                --verbosity 'Information' `
+                --recurse-containers `
+                $_
+            
             Add-Content -Path "$p\_signed.txt" -Value $packageName
+            
         }
 }
 
