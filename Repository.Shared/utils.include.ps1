@@ -274,7 +274,8 @@ function Set-NuGetContentsDigitalSignature {
 
     $nupkgFiles | 
         ForEach-Object {
-            Add-Content -Path "$p\_signed.txt" -Value [System.IO.Path]::GetFileNameWithoutExtension($_)
+            $packageName = [System.IO.Path]::GetFileNameWithoutExtension($_)
+            Add-Content -Path "$p\_signed.txt" -Value $packageName
         }
     
     Remove-Item -Path $tempFile
