@@ -264,7 +264,7 @@ function Set-NuGetContentsDigitalSignature {
         --artifact-signing-certificate-profile $CertProfile `
         --azure-credential-type 'managed-identity' `
         --timestamp-url 'http://timestamp.digicert.com' `
-        --verbosity 'Information' `
+        --verbosity 'Trace' `
         --recurse-containers `
         ($nupkgFiles -Join " ")
 
