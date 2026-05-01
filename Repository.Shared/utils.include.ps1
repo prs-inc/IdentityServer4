@@ -251,7 +251,7 @@ function Set-NuGetContentsDigitalSignature {
     # get the nupkg files in this directory that have not had their contents signed before
     $nupkgFiles = @(Get-ChildItem -Path "$p\$Prefix.*.nupkg" |
         Where-Object {$signedFiles -notcontains [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)} |
-        Select-Object -ExpandProperty 'FullName')
+        Select-Object -ExpandProperty 'Name')
 
     # iterate through each file - rename the .nupkg files into .zip and extract their contents.  Then sign
     # the contents that were extracted.  Then zip that directory back up and change the extension back to
@@ -265,6 +265,7 @@ function Set-NuGetContentsDigitalSignature {
         --azure-credential-type 'managed-identity' `
         --timestamp-url 'http://timestamp.digicert.com' `
         --verbosity 'Trace' `
+        --base-directory $p `
         --recurse-containers `
         ($nupkgFiles -Join " ")
 
