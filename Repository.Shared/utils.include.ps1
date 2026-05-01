@@ -253,27 +253,31 @@ function Set-NuGetContentsDigitalSignature {
         Where-Object {$signedFiles -notcontains [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)} |
         Select-Object -ExpandProperty 'FullName')
 
+    $tempFile = [System.IO.Path]::GetTempFileName()
+    
+    $nupkgFiles | Add-Content -Path $tempFile
+    
     # iterate through each file - rename the .nupkg files into .zip and extract their contents.  Then sign
     # the contents that were extracted.  Then zip that directory back up and change the extension back to
     # .nupkg.  Clean up the resources and make a note of having signed the .nupkg file.
-    $nupkgFiles |
-        ForEach-Object {
+    Write-Host "going to sign contents of nupkg files"
+    
+    dotnet sign code artifact-signing `
+        --artifact-signing-endpoint $Endpoint `
+        --artifact-signing-account $Account `
+        --artifact-signing-certificate-profile $CertProfile `
+        --azure-credential-type 'managed-identity' `
+        --timestamp-url 'http://timestamp.digicert.com' `
+        --verbosity 'Information' `
+        --recurse-containers `
+        --file-list $tempFile
 
-            $packageName = [System.IO.Path]::GetFileNameWithoutExtension($_)
-            Write-Host "going to sign contents of nupkg $packageName"
-            
-            dotnet sign code artifact-signing `
-                --artifact-signing-endpoint $Endpoint `
-                --artifact-signing-account $Account `
-                --artifact-signing-certificate-profile $CertProfile `
-                --azure-credential-type 'managed-identity' `
-                --timestamp-url 'http://timestamp.digicert.com' `
-                --verbosity 'Information' `
-                --recurse-containers `
-                $_
-            
-            Add-Content -Path "$p\_signed.txt" -Value $packageName
+    $nupkgFiles | 
+        ForEach-Object {
+            Add-Content -Path "$p\_signed.txt" -Value [System.IO.Path]::GetFileNameWithoutExtension($_)
         }
+    
+    Remove-Item -Path $tempFile
 }
 
 function Zip-Directory {
